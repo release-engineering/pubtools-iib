@@ -1,0 +1,6 @@
+six
+setuptools
+pushcollector
+pubtools-pulp
+iiblib
+pubtools-pulplib
