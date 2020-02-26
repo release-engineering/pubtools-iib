@@ -151,7 +151,7 @@ def test_add_bundles_cli(
     assert fixture_pushcollector.items == [
         {
             "state": "PENDING",
-            "origin": "bundle1",
+            "origin": "index-image",
             "filename": "operator-bundle1",
             "file_path": "bundle1",
             "repo": "redhat-operators",
@@ -161,7 +161,7 @@ def test_add_bundles_cli(
         },
         {
             "state": "PUSHED",
-            "origin": "bundle1",
+            "origin": "index-image",
             "filename": "operator-bundle1",
             "file_path": "bundle1",
             "repo": "redhat-operators",
@@ -208,7 +208,7 @@ def test_add_bundles_cli_error(
     assert fixture_pushcollector.items == [
         {
             "state": "PENDING",
-            "origin": "bundle1",
+            "origin": "index-image",
             "filename": "operator-bundle1",
             "file_path": "bundle1",
             "repo": "redhat-operators",
@@ -218,7 +218,7 @@ def test_add_bundles_cli_error(
         },
         {
             "state": "NOTPUSHED",
-            "origin": "bundle1",
+            "origin": "index-image",
             "filename": "operator-bundle1",
             "file_path": "bundle1",
             "repo": "redhat-operators",
@@ -306,7 +306,7 @@ def test_remove_operators_cli(
     assert fixture_pushcollector.items == [
         {
             "state": "PENDING",
-            "origin": "",
+            "origin": "index-image",
             "filename": "operator-op1",
             "file_path": "",
             "repo": "redhat-operators",
@@ -316,7 +316,7 @@ def test_remove_operators_cli(
         },
         {
             "state": "DELETED",
-            "origin": "",
+            "origin": "index-image",
             "filename": "operator-op1",
             "file_path": "",
             "repo": "redhat-operators",
@@ -365,7 +365,7 @@ def test_remove_operators_cli_error(
     assert fixture_pushcollector.items == [
         {
             "state": "PENDING",
-            "origin": "",
+            "origin": "index-image",
             "filename": "operator-op1",
             "file_path": "",
             "repo": "redhat-operators",
@@ -375,7 +375,7 @@ def test_remove_operators_cli_error(
         },
         {
             "state": "NOTPUSHED",
-            "origin": "",
+            "origin": "index-image",
             "filename": "operator-op1",
             "file_path": "",
             "repo": "redhat-operators",

@@ -95,17 +95,17 @@ RM_CMD_ARGS[("--operator",)] = {
 
 def push_items_from_build(build_details, state, pulp_repository):
     ret = []
-    operators = build_details.operators
+    operators = build_details.removed_operators
     bundles = (
         build_details.bundles
         if build_details.bundles
-        else [""] * len(build_details.operators)
+        else [""] * len(build_details.removed_operators)
     )
 
     for operator, bundle in zip(operators, bundles):
         item = {
             "state": state,
-            "origin": bundle,
+            "origin": build_details.from_index,
             "filename": operator,
             "file_path": bundle,
             "repo": pulp_repository,
