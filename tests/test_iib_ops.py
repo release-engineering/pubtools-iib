@@ -57,9 +57,6 @@ def fixture_pushcollector():
     pushcollector.Collector.set_default_backend("pubtools-ibb-test")
     yield fake_collector
 
-    # with mock.patch("pushcollector.Collector.update_push_items") as mocked_update_push_items:
-    #    yield mocked_update_push_items
-
 
 @pytest.fixture
 def fixture_iib_krb_auth():
@@ -152,8 +149,26 @@ def test_add_bundles_cli(
     assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "index_image"
 
     assert fixture_pushcollector.items == [
-        {"state": "PENDING", "origin": "bundle1", "filename": "operator-bundle1"},
-        {"state": "PUSHED", "origin": "bundle1", "filename": "operator-bundle1"},
+        {
+            "state": "PENDING",
+            "origin": "bundle1",
+            "filename": "operator-bundle1",
+            "file_path": "bundle1",
+            "repo": "redhat-operators",
+            "build": None,
+            "signing_key": None,
+            "checksums": None,
+        },
+        {
+            "state": "PUSHED",
+            "origin": "bundle1",
+            "filename": "operator-bundle1",
+            "file_path": "bundle1",
+            "repo": "redhat-operators",
+            "build": None,
+            "signing_key": None,
+            "checksums": None,
+        },
     ]
 
 
@@ -191,8 +206,26 @@ def test_add_bundles_cli_error(
             pass
 
     assert fixture_pushcollector.items == [
-        {"state": "PENDING", "origin": "bundle1", "filename": "operator-bundle1"},
-        {"state": "NOTPUSHED", "origin": "bundle1", "filename": "operator-bundle1"},
+        {
+            "state": "PENDING",
+            "origin": "bundle1",
+            "filename": "operator-bundle1",
+            "file_path": "bundle1",
+            "repo": "redhat-operators",
+            "build": None,
+            "signing_key": None,
+            "checksums": None,
+        },
+        {
+            "state": "NOTPUSHED",
+            "origin": "bundle1",
+            "filename": "operator-bundle1",
+            "file_path": "bundle1",
+            "repo": "redhat-operators",
+            "build": None,
+            "signing_key": None,
+            "checksums": None,
+        },
     ]
 
 
@@ -271,8 +304,26 @@ def test_remove_operators_cli(
     assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "index_image"
 
     assert fixture_pushcollector.items == [
-        {"state": "PENDING", "origin": "", "filename": "operator-op1"},
-        {"state": "DELETED", "origin": "", "filename": "operator-op1"},
+        {
+            "state": "PENDING",
+            "origin": "",
+            "filename": "operator-op1",
+            "file_path": "",
+            "repo": "redhat-operators",
+            "build": None,
+            "signing_key": None,
+            "checksums": None,
+        },
+        {
+            "state": "DELETED",
+            "origin": "",
+            "filename": "operator-op1",
+            "file_path": "",
+            "repo": "redhat-operators",
+            "build": None,
+            "signing_key": None,
+            "checksums": None,
+        },
     ]
 
 
@@ -312,8 +363,26 @@ def test_remove_operators_cli_error(
             pass
 
     assert fixture_pushcollector.items == [
-        {"state": "PENDING", "origin": "", "filename": "operator-op1"},
-        {"state": "NOTPUSHED", "origin": "", "filename": "operator-op1"},
+        {
+            "state": "PENDING",
+            "origin": "",
+            "filename": "operator-op1",
+            "file_path": "",
+            "repo": "redhat-operators",
+            "build": None,
+            "signing_key": None,
+            "checksums": None,
+        },
+        {
+            "state": "NOTPUSHED",
+            "origin": "",
+            "filename": "operator-op1",
+            "file_path": "",
+            "repo": "redhat-operators",
+            "build": None,
+            "signing_key": None,
+            "checksums": None,
+        },
     ]
 
 

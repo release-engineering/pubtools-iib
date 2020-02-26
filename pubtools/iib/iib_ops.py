@@ -93,7 +93,7 @@ RM_CMD_ARGS[("--operator",)] = {
 }
 
 
-def push_items_from_build(build_details, state):
+def push_items_from_build(build_details, state, pulp_repository):
     ret = []
     operators = build_details.operators
     bundles = (
@@ -103,7 +103,16 @@ def push_items_from_build(build_details, state):
     )
 
     for operator, bundle in zip(operators, bundles):
-        item = {"state": state, "origin": bundle, "filename": operator}
+        item = {
+            "state": state,
+            "origin": bundle,
+            "filename": operator,
+            "file_path": bundle,
+            "repo": pulp_repository,
+            "build": None,
+            "signing_key": None,
+            "checksums": None,
+        }
         ret.append(item)
     return ret
 
@@ -144,13 +153,15 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
     )
 
     LOG.debug("Updating push items")
-    push_items = push_items_from_build(build_details, "PENDING")
+    push_items = push_items_from_build(build_details, "PENDING", args.pulp_repository)
     pc.update_push_items(push_items)
 
     build_details = iib_c.wait_for_build(build_details)
     if build_details.state == "error":
         LOG.error("IIB operation failed")
-        push_items = push_items_from_build(build_details, "NOTPUSHED")
+        push_items = push_items_from_build(
+            build_details, "NOTPUSHED", args.pulp_repository
+        )
         pc.update_push_items(push_items)
         sys.exit(1)
 
@@ -185,7 +196,9 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
     ) as entry_func:
         entry_func()
 
-    push_items = push_items_from_build(build_details, items_final_state)
+    push_items = push_items_from_build(
+        build_details, items_final_state, args.pulp_repository
+    )
     pc.update_push_items(push_items)
     return build_details
 
