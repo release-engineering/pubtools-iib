@@ -179,8 +179,6 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
         args.pulp_url,
         "--pulp-user",
         args.pulp_user,
-        "--pulp-password",
-        args.pulp_password,
         "--repo-ids",
         args.pulp_repository,
     ]
