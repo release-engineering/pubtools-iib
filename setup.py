@@ -67,7 +67,7 @@ if os.environ.get("READTHEDOCS", None):
 
 setup(
     name="pubtools-iib",
-    version="0.1.0",
+    version="0.2.0",
     description="Pubtools-iib",
     long_description=long_description,
     author="Jindrich Luza",
