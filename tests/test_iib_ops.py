@@ -152,7 +152,7 @@ def test_add_bundles_cli(
         {
             "state": "PENDING",
             "origin": "index-image",
-            "filename": "operator-bundle1",
+            "filename": "operator-1",
             "file_path": "bundle1",
             "repo": "redhat-operators",
             "build": None,
@@ -162,7 +162,7 @@ def test_add_bundles_cli(
         {
             "state": "PUSHED",
             "origin": "index-image",
-            "filename": "operator-bundle1",
+            "filename": "operator-1",
             "file_path": "bundle1",
             "repo": "redhat-operators",
             "build": None,
@@ -189,7 +189,7 @@ def test_add_bundles_cli_error(
     fixture_iib_client.return_value.add_bundles.side_effect = lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
         fake_tm.setup_task(
             *args,
-            **dict(list(kwargs.items()) + [("state_seq", ("in_progress", "error"))])
+            **dict(list(kwargs.items()) + [("state_seq", ("in_progress", "failed"))])
         )
     )
 
@@ -209,7 +209,7 @@ def test_add_bundles_cli_error(
         {
             "state": "PENDING",
             "origin": "index-image",
-            "filename": "operator-bundle1",
+            "filename": "operator-1",
             "file_path": "bundle1",
             "repo": "redhat-operators",
             "build": None,
@@ -219,7 +219,7 @@ def test_add_bundles_cli_error(
         {
             "state": "NOTPUSHED",
             "origin": "index-image",
-            "filename": "operator-bundle1",
+            "filename": "operator-1",
             "file_path": "bundle1",
             "repo": "redhat-operators",
             "build": None,
@@ -346,7 +346,7 @@ def test_remove_operators_cli_error(
             *args,
             **dict(
                 list(kwargs.items())
-                + [("state_seq", ("in_progress", "error")), ("op_type", "remove")]
+                + [("state_seq", ("in_progress", "failed")), ("op_type", "remove")]
             )
         )
     )

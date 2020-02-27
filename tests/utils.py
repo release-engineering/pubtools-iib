@@ -16,7 +16,7 @@ class FakeTaskManager(object):
         self,
         index,
         binary,
-        bundles_map,
+        map_or_op,
         arches,
         state_seq=("in_progress", "finished"),
         op_type="add",
@@ -30,17 +30,21 @@ class FakeTaskManager(object):
             "state_history": [],
             "from_index": index,
             "from_index_resolved": index + "-resolved",
-            "removed_operators": ["operator-%s" % k for k in bundles_map],
             "binary_image": binary,
             "binary_image_resolved": binary + "-resolved",
-            "bundle_mapping": {"operator-1": bundles_map},
+            "bundle_mapping": {},
             "index_image": "index_image",
-            "request_type": "request_type",
             "arches": arches,
         }
 
+        if op_type == "remove":
+            self.tasks[tid]["request_type"] = 2
+            self.tasks[tid]["removed_operators"] = [
+                "operator-%s" % k for k in map_or_op
+            ]
         if op_type == "add":
-            self.tasks[tid]["bundles"] = bundles_map
+            self.tasks[tid]["request_type"] = 1
+            self.tasks[tid]["bundle_mapping"] = {"operator-1": map_or_op}
 
         return self.tasks[tid]
 

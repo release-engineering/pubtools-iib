@@ -12,7 +12,8 @@ from .utils import (
 from pubtools import pulplib
 import pushcollector
 
-LOG = logging.getLogger("pubtools.iib")
+LOG = logging.getLogger()
+LOG.setLevel(logging.INFO)
 
 CMD_ARGS = {
     ("--pulp-url",): {
@@ -95,25 +96,34 @@ RM_CMD_ARGS[("--operator",)] = {
 
 def push_items_from_build(build_details, state, pulp_repository):
     ret = []
-    operators = build_details.removed_operators
-    bundles = (
-        build_details.bundles
-        if build_details.bundles
-        else [""] * len(build_details.removed_operators)
-    )
+    if build_details.request_type == 1:
+        for operator, bundles in build_details.bundle_mapping.items():
+            for bundle in bundles:
+                item = {
+                    "state": state,
+                    "origin": build_details.from_index,
+                    "filename": operator,
+                    "file_path": bundle,
+                    "repo": pulp_repository,
+                    "build": None,
+                    "signing_key": None,
+                    "checksums": None,
+                }
+                ret.append(item)
+    elif build_details.request_type == 2:
+        for operator in build_details.removed_operators:
+            item = {
+                "state": state,
+                "origin": build_details.from_index,
+                "filename": operator,
+                "file_path": "",
+                "repo": pulp_repository,
+                "build": None,
+                "signing_key": None,
+                "checksums": None,
+            }
+            ret.append(item)
 
-    for operator, bundle in zip(operators, bundles):
-        item = {
-            "state": state,
-            "origin": build_details.from_index,
-            "filename": operator,
-            "file_path": bundle,
-            "repo": pulp_repository,
-            "build": None,
-            "signing_key": None,
-            "checksums": None,
-        }
-        ret.append(item)
     return ret
 
 
@@ -152,12 +162,12 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
         args.arch,
     )
 
-    LOG.debug("Updating push items")
     push_items = push_items_from_build(build_details, "PENDING", args.pulp_repository)
+    LOG.debug("Updating push items")
     pc.update_push_items(push_items)
 
     build_details = iib_c.wait_for_build(build_details)
-    if build_details.state == "error":
+    if build_details.state == "failed":
         LOG.error("IIB operation failed")
         push_items = push_items_from_build(
             build_details, "NOTPUSHED", args.pulp_repository
@@ -165,14 +175,14 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
         pc.update_push_items(push_items)
         sys.exit(1)
 
-    LOG.debug("IIB build finished")
+    LOG.info("IIB build finished")
     LOG.debug("Getting pulp repository: %s", args.pulp_repository)
     container_repo = pulp_c.get_repository(args.pulp_repository)
-    LOG.debug("Syncing pulp repository with %s", build_details.index_image)
+    LOG.info("Syncing pulp repository with %s", build_details.index_image)
     container_repo.sync(
         pulplib.ContainerSyncOptions(feed=build_details.index_image)
     ).result()
-    LOG.debug("Publishing repository %s", args.pulp_repository)
+    LOG.info("Publishing repository %s", args.pulp_repository)
 
     publish_args = [
         "--pulp-url",
@@ -197,6 +207,7 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
     push_items = push_items_from_build(
         build_details, items_final_state, args.pulp_repository
     )
+    LOG.info("IIB push finished")
     pc.update_push_items(push_items)
     return build_details
 

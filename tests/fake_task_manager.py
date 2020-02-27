@@ -10,7 +10,13 @@ class FakeTaskManager(object):
         return ret
 
     def setup_task(
-        self, index, binary, bundles_map, arches, state_seq=("in_progress", "finished")
+        self,
+        index,
+        binary,
+        map_or_op,
+        arches,
+        state_seq=("in_progress", "finished"),
+        op_type="add",
     ):
         tid = self._gen_task_id()
         self.task_state_seq[tid] = list(state_seq)
@@ -21,15 +27,25 @@ class FakeTaskManager(object):
             "state_history": [],
             "from_index": index,
             "from_index_resolved": index + "-resolved",
-            "bundles": bundles_map,
-            "removed_operators": ["operator-%s" % k for k in bundles_map],
+            "bundles": map_or_op,
             "binary_image": binary,
-            "bundle_mapping": {"operator-1": bundles_map},
             "binary_image_resolved": binary + "-resolved",
             "index_image": "index_image",
-            "request_type": "request_type",
             "arches": arches,
         }
+        import sys
+
+        print >>sys.sderr, "OP_TYPE %s" % op_type
+
+        if op_type == "remove":
+            self.tasks[tid]["request_type"] = 2
+            self.tasks[tid]["removed_operators"] = [
+                "operator-%s" % k for k in map_or_op
+            ]
+        if op_type == "add":
+            self.tasks[tid]["request_type"] = 1
+            self.tasks[tid]["bundle_mapping"] = {"operator-1": map_or_op}
+
         return self.tasks[tid]
 
     def get_task(self, tid):
