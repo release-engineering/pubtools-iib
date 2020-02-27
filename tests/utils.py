@@ -18,6 +18,8 @@ class FakeTaskManager(object):
         binary,
         map_or_op,
         arches,
+        cnr_token=None,
+        organization=None,
         state_seq=("in_progress", "finished"),
         op_type="add",
     ):

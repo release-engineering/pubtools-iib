@@ -134,15 +134,21 @@ def test_add_bundles_cli(
     with setup_entry_point_cli(
         ("pubtools_iib", "console_scripts", "pubtools-iib-add-bundles"),
         "pubtools-iib-add-bundle",
-        fixture_common_iib_op_args + ["--bundle", "bundle1"],
-        {"PULP_PASSWORD": "pulp-password"},
+        fixture_common_iib_op_args
+        + ["--bundle", "bundle1", "--iib-legacy-org", "legacy-org"],
+        {"PULP_PASSWORD": "pulp-password", "CNR_TOKEN": "cnr_token"},
     ) as entry_func:
         entry_func()
     fixture_iib_client.assert_called_once_with(
         "iib-server", fixture_iib_krb_auth.return_value
     )
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
-        "index-image", "binary-image", ["bundle1"], ["arch"]
+        "index-image",
+        "binary-image",
+        ["bundle1"],
+        ["arch"],
+        cnr_token="cnr_token",
+        organization="legacy-org",
     )
     fixture_pulplib_repo_sync.assert_called_once()
     assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "index_image"
@@ -199,7 +205,7 @@ def test_add_bundles_cli_error(
         ("pubtools_iib", "console_scripts", "pubtools-iib-add-bundles"),
         "pubtools-iib-add-bundle",
         fixture_common_iib_op_args + ["--bundle", "bundle1"],
-        {"PULP_PASSWORD": "pulp-password"},
+        {"PULP_PASSWORD": "pulp-password", "CNR_TOKEN": "cnr_token"},
     ) as entry_func:
         try:
             entry_func()
@@ -246,7 +252,7 @@ def test_add_bundles_py(
     fixture_pulp_client.return_value.get_repository.return_value = repo
     with setup_entry_point_py(
         ("pubtools_iib", "console_scripts", "pubtools-iib-add-bundles"),
-        {"PULP_PASSWORD": "pulp-password"},
+        {"PULP_PASSWORD": "pulp-password", "CNR_TOKEN": "cnr_token"},
     ) as entry_func:
         retval = entry_func(
             ["cmd"] + fixture_common_iib_op_args + ["--bundle", "bundle1"]
@@ -258,7 +264,7 @@ def test_add_bundles_py(
         "iib-server", fixture_iib_krb_auth.return_value
     )
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
-        "index-image", "binary-image", ["bundle1"], ["arch"]
+        "index-image", "binary-image", ["bundle1"], ["arch"], cnr_token="cnr_token"
     )
     fixture_pulplib_repo_sync.assert_called_once()
     assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "index_image"
