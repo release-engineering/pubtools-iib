@@ -54,6 +54,18 @@ CMD_ARGS = {
         "required": True,
         "type": str,
     },
+    ("--iib-krb-principal",): {
+        "group": "IIB service",
+        "help": "IIB kerberos principal in form: name@REALM",
+        "required": True,
+        "type": str,
+    },
+    ("--iib-krb-ktfile",): {
+        "group": "IIB service",
+        "help": "IIB kerberos client keytab",
+        "required": False,
+        "type": str,
+    },
     ("--index-image",): {
         "group": "IIB service",
         "help": "<hostname>/<namespace>/<image>:<tag> of index image to rebuild",

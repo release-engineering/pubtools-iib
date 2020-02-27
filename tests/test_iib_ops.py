@@ -111,6 +111,8 @@ def fixture_common_iib_op_args():
         "binary-image",
         "--arch",
         "arch",
+        "--iib-krb-principal",
+        "example@REALM",
     ]
 
 
