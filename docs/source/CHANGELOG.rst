@@ -1,6 +1,10 @@
 ChangeLog
 =========
 
+0.4.0 (2020-02-27)
+------------------
+* added legacy registry support
+
 0.3.0 (2020-02-27)
 ------------------
 * kerberos support
