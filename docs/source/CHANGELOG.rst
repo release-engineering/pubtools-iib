@@ -1,6 +1,10 @@
 ChangeLog
 =========
 
+0.8.0 (2020-03-04)
+------------------
+* fixed repo sync attributes
+
 0.7.0 (2020-03-04)
 ------------------
 * added iib-insecure attribute
