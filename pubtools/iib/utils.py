@@ -16,7 +16,12 @@ def setup_iib_client(parsed_args):
         parsed_args.iib_server,
         ktfile=parsed_args.iib_krb_ktfile,
     )
-    iibc = iibclient.IIBClient(parsed_args.iib_server, auth=iib_auth)
+    kwargs = {
+        "auth": iib_auth,
+    }
+    if parsed_args.iib_insecure:
+        kwargs["ssl_verify"] = False
+    iibc = iibclient.IIBClient(parsed_args.iib_server, **kwargs)
     return iibc
 
 

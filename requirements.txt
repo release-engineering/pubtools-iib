@@ -2,5 +2,5 @@ six
 setuptools
 pushcollector
 pubtools-pulp
-iiblib>=0.3.0
+iiblib>=0.8.0
 pubtools-pulplib

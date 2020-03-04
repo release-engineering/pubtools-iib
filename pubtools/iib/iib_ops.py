@@ -1,3 +1,4 @@
+import json
 import os
 import logging
 import sys
@@ -48,6 +49,12 @@ CMD_ARGS = {
         "type": str,
         "default": "redhat-operators",
     },
+    ("--iib-insecure",): {
+        "group": "IIB service",
+        "help": "Allow unverified HTTPS connection to IIB",
+        "required": False,
+        "type": bool,
+    },
     ("--iib-server",): {
         "group": "IIB service",
         "help": "IIB service hostname",
@@ -82,7 +89,7 @@ CMD_ARGS = {
     ("--index-image",): {
         "group": "IIB service",
         "help": "<hostname>/<namespace>/<image>:<tag> of index image to rebuild",
-        "required": True,
+        "required": False,
         "type": str,
     },
     ("--binary-image",): {
@@ -186,7 +193,6 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
     if args.iib_legacy_org:
         extra_args["organization"] = args.iib_legacy_org
 
-    print(extra_args, bundle_op)
     build_details = bundle_op(
         args.index_image,
         args.binary_image,
@@ -206,6 +212,13 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
             build_details, "NOTPUSHED", args.pulp_repository
         )
         pc.update_push_items(push_items)
+        json.dump(
+            build_details.to_dict(),
+            sys.stderr,
+            sort_keys=True,
+            indent=4,
+            separators=(",", ": "),
+        )
         sys.exit(1)
 
     LOG.info("IIB build finished")
