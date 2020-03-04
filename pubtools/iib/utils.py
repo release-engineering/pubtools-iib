@@ -12,7 +12,9 @@ from iiblib.iibclient import IIBBuildDetailsModel
 
 def setup_iib_client(parsed_args):
     iib_auth = iibclient.IIBKrbAuth(
-        parsed_args.iib_krb_principal, ktfile=parsed_args.iib_krb_ktfile
+        parsed_args.iib_krb_principal,
+        parsed_args.iib_server,
+        ktfile=parsed_args.iib_krb_ktfile,
     )
     iibc = iibclient.IIBClient(parsed_args.iib_server, auth=iib_auth)
     return iibc
