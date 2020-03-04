@@ -1,6 +1,12 @@
 ChangeLog
 =========
 
+0.7.0 (2020-03-04)
+------------------
+* added iib-insecure attribute
+* dump error build details on output
+* index-image attribute optional
+
 0.6.0 (2020-03-04)
 ------------------
 * iiblib 0.7.0 compat changes
