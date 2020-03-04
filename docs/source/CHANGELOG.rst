@@ -1,6 +1,10 @@
 ChangeLog
 =========
 
+0.6.0 (2020-03-04)
+------------------
+* iiblib 0.7.0 compat changes
+
 0.5.0 (2020-03-03)
 ------------------
 * fixed invalid argument for IIBClient init
