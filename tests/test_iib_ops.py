@@ -113,6 +113,7 @@ def fixture_common_iib_op_args():
         "arch",
         "--iib-krb-principal",
         "example@REALM",
+        "--iib-insecure",
     ]
 
 
@@ -140,7 +141,7 @@ def test_add_bundles_cli(
     ) as entry_func:
         entry_func()
     fixture_iib_client.assert_called_once_with(
-        "iib-server", auth=fixture_iib_krb_auth.return_value
+        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
     )
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
         "index-image",
@@ -260,7 +261,7 @@ def test_add_bundles_py(
     assert isinstance(retval, IIBBuildDetailsModel)
 
     fixture_iib_client.assert_called_once_with(
-        "iib-server", auth=fixture_iib_krb_auth.return_value
+        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
     )
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
         "index-image", "binary-image", ["bundle1"], ["arch"], cnr_token="cnr_token"
@@ -298,7 +299,7 @@ def test_remove_operators_cli(
     ) as entry_func:
         entry_func()
     fixture_iib_client.assert_called_once_with(
-        "iib-server", auth=fixture_iib_krb_auth.return_value
+        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
     )
     fixture_iib_client.return_value.remove_operators.assert_called_once_with(
         "index-image", "binary-image", ["op1"], ["arch"]
@@ -415,7 +416,7 @@ def test_remove_operators_py(
     assert isinstance(retval, IIBBuildDetailsModel)
 
     fixture_iib_client.assert_called_once_with(
-        "iib-server", auth=fixture_iib_krb_auth.return_value
+        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
     )
     fixture_iib_client.return_value.remove_operators.assert_called_once_with(
         "index-image", "binary-image", ["op1"], ["arch"]
