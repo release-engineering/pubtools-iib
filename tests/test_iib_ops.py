@@ -151,10 +151,9 @@ def test_add_bundles_cli(
         organization="legacy-org",
     )
     fixture_pulplib_repo_sync.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "index_image"
+    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "feed.com"
 
     fixture_pulplib_repo_publish.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "index_image"
 
     assert fixture_pushcollector.items == [
         {
@@ -267,10 +266,9 @@ def test_add_bundles_py(
         "index-image", "binary-image", ["bundle1"], ["arch"], cnr_token="cnr_token"
     )
     fixture_pulplib_repo_sync.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "index_image"
+    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "feed.com"
 
     fixture_pulplib_repo_publish.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "index_image"
 
 
 def test_remove_operators_cli(
@@ -306,10 +304,9 @@ def test_remove_operators_cli(
         "index-image", "binary-image", ["op1"], ["arch"]
     )
     fixture_pulplib_repo_sync.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "index_image"
+    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "feed.com"
 
     fixture_pulplib_repo_publish.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "index_image"
 
     assert fixture_pushcollector.items == [
         {
@@ -424,10 +421,9 @@ def test_remove_operators_py(
         "index-image", "binary-image", ["op1"], ["arch"]
     )
     fixture_pulplib_repo_sync.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "index_image"
+    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "feed.com"
 
     fixture_pulplib_repo_publish.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "index_image"
 
 
 def test_invalid_op(fixture_common_iib_op_args):

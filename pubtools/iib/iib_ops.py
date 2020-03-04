@@ -224,9 +224,11 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
     LOG.info("IIB build finished")
     LOG.debug("Getting pulp repository: %s", args.pulp_repository)
     container_repo = pulp_c.get_repository(args.pulp_repository)
+    feed, path = build_details.index_image.split("/", 1)
+    upstream_name, tag = path.split(":")
     LOG.info("Syncing pulp repository with %s", build_details.index_image)
     container_repo.sync(
-        pulplib.ContainerSyncOptions(feed=build_details.index_image)
+        pulplib.ContainerSyncOptions(feed=feed, upstream_name=upstream_name)
     ).result()
     LOG.info("Publishing repository %s", args.pulp_repository)
 

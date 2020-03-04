@@ -35,7 +35,7 @@ class FakeTaskManager(object):
             "binary_image": binary,
             "binary_image_resolved": binary + "-resolved",
             "bundle_mapping": {},
-            "index_image": "index_image",
+            "index_image": "feed.com/index/image:tag",
             "arches": arches,
         }
 

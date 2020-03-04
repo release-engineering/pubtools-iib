@@ -53,7 +53,6 @@ INSTALL_REQURIES = ["setuptools", "pubtools-pulplib", "pubtools-pulp", "iiblib"]
 
 DEPENDENCY_LINKS = [
     "git+https://gitlab.cee.redhat.com/jluza/iiblib.git@master#egg=iiblib",
-    "http://github.com/jluza/pubtools-pulplib@sync-support#egg=pubtools-pulplib",
 ]
 
 
