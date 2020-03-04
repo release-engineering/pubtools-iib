@@ -1,6 +1,10 @@
 ChangeLog
 =========
 
+0.9.0 (2020-03-04)
+------------------
+* succesful build dump to output
+
 0.8.0 (2020-03-04)
 ------------------
 * fixed repo sync attributes
