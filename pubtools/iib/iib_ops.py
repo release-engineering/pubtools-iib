@@ -219,6 +219,7 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
             indent=4,
             separators=(",", ": "),
         )
+        sys.stderr.write("\n")
         sys.exit(1)
 
     LOG.info("IIB build finished")
@@ -257,6 +258,14 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
     )
     LOG.info("IIB push finished")
     pc.update_push_items(push_items)
+    json.dump(
+        build_details.to_dict(),
+        sys.stdout,
+        sort_keys=True,
+        indent=4,
+        separators=(",", ": "),
+    )
+    sys.stdout.write("\n")
     return build_details
 
 
