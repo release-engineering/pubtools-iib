@@ -1,6 +1,11 @@
 ChangeLog
 =========
 
+0.10.0 (2020-03-04)
+-------------------
+* fixed wrong feed attribute
+* sync only needed tags
+
 0.9.0 (2020-03-04)
 ------------------
 * succesful build dump to output
