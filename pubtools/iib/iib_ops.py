@@ -229,7 +229,9 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
     upstream_name, tag = path.split(":")
     LOG.info("Syncing pulp repository with %s", build_details.index_image)
     container_repo.sync(
-        pulplib.ContainerSyncOptions(feed=feed, upstream_name=upstream_name)
+        pulplib.ContainerSyncOptions(
+            feed="https://%s" % feed, upstream_name=upstream_name, tags=[tag]
+        )
     ).result()
     LOG.info("Publishing repository %s", args.pulp_repository)
 
