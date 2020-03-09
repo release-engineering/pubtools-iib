@@ -1,6 +1,10 @@
 ChangeLog
 =========
 
+0.11.0 (2020-03-09)
+-------------------
+* Fixed push items handling
+
 0.10.0 (2020-03-04)
 -------------------
 * fixed wrong feed attribute
