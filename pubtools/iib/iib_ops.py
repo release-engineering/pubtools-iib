@@ -128,29 +128,29 @@ RM_CMD_ARGS[("--operator",)] = {
 
 def push_items_from_build(build_details, state, pulp_repository):
     ret = []
-    if build_details.request_type == 1:
+    if build_details.request_type == "add":
         for operator, bundles in build_details.bundle_mapping.items():
             for bundle in bundles:
                 item = {
                     "state": state,
-                    "origin": build_details.from_index,
+                    "origin": build_details.from_index or "scratch",
+                    "src": bundle,
                     "filename": operator,
-                    "file_path": bundle,
-                    "repo": pulp_repository,
-                    "build": None,
+                    "dest": pulp_repository,
+                    "build": build_details.index_image,
                     "signing_key": None,
                     "checksums": None,
                 }
                 ret.append(item)
-    elif build_details.request_type == 2:
+    elif build_details.request_type == "rm":
         for operator in build_details.removed_operators:
             item = {
                 "state": state,
-                "origin": build_details.from_index,
+                "origin": build_details.from_index or "scratch",
+                "src": None,
                 "filename": operator,
-                "file_path": "",
-                "repo": pulp_repository,
-                "build": None,
+                "dest": pulp_repository,
+                "build": build_details.index_image,
                 "signing_key": None,
                 "checksums": None,
             }

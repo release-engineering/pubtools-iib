@@ -161,21 +161,21 @@ def test_add_bundles_cli(
             "state": "PENDING",
             "origin": "index-image",
             "filename": "operator-1",
-            "file_path": "bundle1",
-            "repo": "redhat-operators",
-            "build": None,
+            "build": "feed.com/index/image:tag",
+            "dest": "redhat-operators",
             "signing_key": None,
             "checksums": None,
+            "src": "bundle1",
         },
         {
             "state": "PUSHED",
             "origin": "index-image",
             "filename": "operator-1",
-            "file_path": "bundle1",
-            "repo": "redhat-operators",
-            "build": None,
+            "build": "feed.com/index/image:tag",
+            "dest": "redhat-operators",
             "signing_key": None,
             "checksums": None,
+            "src": "bundle1",
         },
     ]
 
@@ -218,21 +218,21 @@ def test_add_bundles_cli_error(
             "state": "PENDING",
             "origin": "index-image",
             "filename": "operator-1",
-            "file_path": "bundle1",
-            "repo": "redhat-operators",
-            "build": None,
+            "build": "feed.com/index/image:tag",
+            "dest": "redhat-operators",
             "signing_key": None,
             "checksums": None,
+            "src": "bundle1",
         },
         {
             "state": "NOTPUSHED",
             "origin": "index-image",
             "filename": "operator-1",
-            "file_path": "bundle1",
-            "repo": "redhat-operators",
-            "build": None,
+            "build": "feed.com/index/image:tag",
+            "dest": "redhat-operators",
             "signing_key": None,
             "checksums": None,
+            "src": "bundle1",
         },
     ]
 
@@ -287,9 +287,7 @@ def test_remove_operators_cli(
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
     fixture_iib_client.return_value.remove_operators.side_effect = lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
-        fake_tm.setup_task(
-            *args, **dict(list(kwargs.items()) + [("op_type", "remove")])
-        )
+        fake_tm.setup_task(*args, **dict(list(kwargs.items()) + [("op_type", "rm")]))
     )
     with setup_entry_point_cli(
         ("pubtools_iib", "console_scripts", "pubtools-iib-remove-operators"),
@@ -314,21 +312,21 @@ def test_remove_operators_cli(
             "state": "PENDING",
             "origin": "index-image",
             "filename": "operator-op1",
-            "file_path": "",
-            "repo": "redhat-operators",
-            "build": None,
+            "dest": "redhat-operators",
+            "build": "feed.com/index/image:tag",
             "signing_key": None,
             "checksums": None,
+            "src": None,
         },
         {
             "state": "DELETED",
             "origin": "index-image",
             "filename": "operator-op1",
-            "file_path": "",
-            "repo": "redhat-operators",
-            "build": None,
+            "dest": "redhat-operators",
+            "build": "feed.com/index/image:tag",
             "signing_key": None,
             "checksums": None,
+            "src": None,
         },
     ]
 
@@ -352,7 +350,7 @@ def test_remove_operators_cli_error(
             *args,
             **dict(
                 list(kwargs.items())
-                + [("state_seq", ("in_progress", "failed")), ("op_type", "remove")]
+                + [("state_seq", ("in_progress", "failed")), ("op_type", "rm")]
             )
         )
     )
@@ -373,21 +371,21 @@ def test_remove_operators_cli_error(
             "state": "PENDING",
             "origin": "index-image",
             "filename": "operator-op1",
-            "file_path": "",
-            "repo": "redhat-operators",
-            "build": None,
+            "dest": "redhat-operators",
+            "build": "feed.com/index/image:tag",
             "signing_key": None,
             "checksums": None,
+            "src": None,
         },
         {
             "state": "NOTPUSHED",
             "origin": "index-image",
             "filename": "operator-op1",
-            "file_path": "",
-            "repo": "redhat-operators",
-            "build": None,
+            "dest": "redhat-operators",
+            "build": "feed.com/index/image:tag",
             "signing_key": None,
             "checksums": None,
+            "src": None,
         },
     ]
 

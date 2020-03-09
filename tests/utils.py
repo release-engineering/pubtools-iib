@@ -39,13 +39,13 @@ class FakeTaskManager(object):
             "arches": arches,
         }
 
-        if op_type == "remove":
-            self.tasks[tid]["request_type"] = 2
+        if op_type == "rm":
+            self.tasks[tid]["request_type"] = "rm"
             self.tasks[tid]["removed_operators"] = [
                 "operator-%s" % k for k in map_or_op
             ]
         if op_type == "add":
-            self.tasks[tid]["request_type"] = 1
+            self.tasks[tid]["request_type"] = "add"
             self.tasks[tid]["bundle_mapping"] = {"operator-1": map_or_op}
 
         return self.tasks[tid]
