@@ -20,6 +20,7 @@ class FakeTaskManager(object):
         arches,
         cnr_token=None,
         organization=None,
+        overwrite_from_index=False,
         state_seq=("in_progress", "finished"),
         op_type="add",
     ):
