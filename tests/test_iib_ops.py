@@ -114,6 +114,7 @@ def fixture_common_iib_op_args():
         "--iib-krb-principal",
         "example@REALM",
         "--iib-insecure",
+        "--overwrite-from-index",
     ]
 
 
@@ -150,6 +151,7 @@ def test_add_bundles_cli(
         ["arch"],
         cnr_token="cnr_token",
         organization="legacy-org",
+        overwrite_from_index=True,
     )
     fixture_pulplib_repo_sync.assert_called_once()
     assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
@@ -264,7 +266,12 @@ def test_add_bundles_py(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
     )
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
-        "index-image", "binary-image", ["bundle1"], ["arch"], cnr_token="cnr_token"
+        "index-image",
+        "binary-image",
+        ["bundle1"],
+        ["arch"],
+        cnr_token="cnr_token",
+        overwrite_from_index=True,
     )
     fixture_pulplib_repo_sync.assert_called_once()
     assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
@@ -300,7 +307,7 @@ def test_remove_operators_cli(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
     )
     fixture_iib_client.return_value.remove_operators.assert_called_once_with(
-        "index-image", "binary-image", ["op1"], ["arch"]
+        "index-image", "binary-image", ["op1"], ["arch"], overwrite_from_index=True
     )
     fixture_pulplib_repo_sync.assert_called_once()
     assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
@@ -417,7 +424,7 @@ def test_remove_operators_py(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
     )
     fixture_iib_client.return_value.remove_operators.assert_called_once_with(
-        "index-image", "binary-image", ["op1"], ["arch"]
+        "index-image", "binary-image", ["op1"], ["arch"], overwrite_from_index=True
     )
     fixture_pulplib_repo_sync.assert_called_once()
     assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"

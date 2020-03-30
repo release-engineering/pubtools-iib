@@ -105,6 +105,12 @@ CMD_ARGS = {
         "type": str,
         "count": "+",
     },
+    ("--overwrite-from-index",): {
+        "group": "IIB service",
+        "help": "overwrite from_index_image as output",
+        "required": False,
+        "type": bool,
+    },
 }
 
 ADD_CMD_ARGS = CMD_ARGS.copy()
@@ -192,6 +198,8 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
         extra_args = {"cnr_token": args.iib_cnr_token}
     if args.iib_legacy_org:
         extra_args["organization"] = args.iib_legacy_org
+    if args.overwrite_from_index:
+        extra_args["overwrite_from_index"] = args.overwrite_from_index
 
     build_details = bundle_op(
         args.index_image,
