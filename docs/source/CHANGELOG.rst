@@ -1,6 +1,10 @@
 ChangeLog
 =========
 
+0.12.0 (2020-03-30)
+-------------------
+* added --overwrite-index-image param
+
 0.11.0 (2020-03-09)
 -------------------
 * Fixed push items handling
