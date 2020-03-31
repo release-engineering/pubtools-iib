@@ -80,12 +80,6 @@ CMD_ARGS = {
         "type": str,
         "env_variable": "CNR_TOKEN",
     },
-    ("--iib-legacy-org",): {
-        "group": "IIB service",
-        "help": "Organization for legacy registry",
-        "required": False,
-        "type": str,
-    },
     ("--index-image",): {
         "group": "IIB service",
         "help": "<hostname>/<namespace>/<image>:<tag> of index image to rebuild",
@@ -120,6 +114,12 @@ ADD_CMD_ARGS[("--bundle",)] = {
     "required": True,
     "type": str,
     "count": "+",
+}
+ADD_CMD_ARGS[("--iib-legacy-org",)] = {
+    "group": "IIB service",
+    "help": "Organization for legacy registry",
+    "required": False,
+    "type": str,
 }
 
 RM_CMD_ARGS = CMD_ARGS.copy()
@@ -196,8 +196,8 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
     extra_args = {}
     if operation == "add_bundles":
         extra_args = {"cnr_token": args.iib_cnr_token}
-    if args.iib_legacy_org:
-        extra_args["organization"] = args.iib_legacy_org
+        if args.iib_legacy_org:
+            extra_args["organization"] = args.iib_legacy_org
     if args.overwrite_from_index:
         extra_args["overwrite_from_index"] = args.overwrite_from_index
 
