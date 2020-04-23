@@ -182,6 +182,45 @@ def test_add_bundles_cli(
     ]
 
 
+def test_add_bundles_cli_skip_pulp(
+    fixture_iib_client,
+    fixture_pulp_client,
+    fixture_iib_krb_auth,
+    fixture_pulplib_repo_publish,
+    fixture_pulplib_repo_sync,
+    fixture_container_image_repo,
+    fixture_common_iib_op_args,
+    fixture_pushcollector,
+):
+
+    repo = fixture_container_image_repo
+    fixture_pulp_client.return_value.search_repository.return_value = [repo]
+    fixture_pulp_client.return_value.get_repository.return_value = repo
+
+    with setup_entry_point_cli(
+        ("pubtools_iib", "console_scripts", "pubtools-iib-add-bundles"),
+        "pubtools-iib-add-bundle",
+        fixture_common_iib_op_args
+        + ["--bundle", "bundle1", "--iib-legacy-org", "legacy-org", "--skip-pulp"],
+        {"PULP_PASSWORD": "pulp-password", "CNR_TOKEN": "cnr_token"},
+    ) as entry_func:
+        entry_func()
+    fixture_iib_client.assert_called_once_with(
+        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
+    )
+    fixture_iib_client.return_value.add_bundles.assert_called_once_with(
+        "index-image",
+        "binary-image",
+        ["bundle1"],
+        ["arch"],
+        cnr_token="cnr_token",
+        organization="legacy-org",
+        overwrite_from_index=True,
+    )
+    fixture_pulplib_repo_sync.assert_not_called()
+    fixture_pulplib_repo_publish.assert_not_called()
+
+
 def test_add_bundles_cli_error(
     fixture_iib_client,
     fixture_pulp_client,
@@ -335,6 +374,53 @@ def test_remove_operators_cli(
             "checksums": None,
             "src": None,
         },
+    ]
+
+
+def test_remove_operators_cli_skip_pulp(
+    fixture_iib_client,
+    fixture_pulp_client,
+    fixture_iib_krb_auth,
+    fixture_pulplib_repo_publish,
+    fixture_pulplib_repo_sync,
+    fixture_container_image_repo,
+    fixture_common_iib_op_args,
+    fixture_pushcollector,
+):
+
+    repo = fixture_container_image_repo
+    fixture_pulp_client.return_value.search_repository.return_value = [repo]
+    fixture_pulp_client.return_value.get_repository.return_value = repo
+    fixture_iib_client.return_value.remove_operators.side_effect = lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
+        fake_tm.setup_task(*args, **dict(list(kwargs.items()) + [("op_type", "rm")]))
+    )
+    with setup_entry_point_cli(
+        ("pubtools_iib", "console_scripts", "pubtools-iib-remove-operators"),
+        "pubtools-iib-remove-operators",
+        fixture_common_iib_op_args + ["--operator", "op1", "--skip-pulp"],
+        {"PULP_PASSWORD": "pulp-password"},
+    ) as entry_func:
+        entry_func()
+    fixture_iib_client.assert_called_once_with(
+        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
+    )
+    fixture_iib_client.return_value.remove_operators.assert_called_once_with(
+        "index-image", "binary-image", ["op1"], ["arch"], overwrite_from_index=True
+    )
+    fixture_pulplib_repo_sync.assert_not_called()
+    fixture_pulplib_repo_publish.assert_not_called()
+
+    assert fixture_pushcollector.items == [
+        {
+            "state": "PENDING",
+            "origin": "index-image",
+            "filename": "operator-op1",
+            "dest": "redhat-operators",
+            "build": "feed.com/index/image:tag",
+            "signing_key": None,
+            "checksums": None,
+            "src": None,
+        }
     ]
 
 
