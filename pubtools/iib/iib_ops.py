@@ -105,6 +105,12 @@ CMD_ARGS = {
         "required": False,
         "type": bool,
     },
+    ("--skip-pulp",): {
+        "group": "IIB service",
+        "help": "Skip operations on pulp",
+        "required": False,
+        "type": bool,
+    },
 }
 
 ADD_CMD_ARGS = CMD_ARGS.copy()
@@ -185,8 +191,9 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
         raise ValueError("Must set iib operation")
 
     pc = pushcollector.Collector.get()
-    LOG.debug("Initializing pulp client")
-    pulp_c = setup_pulp_client(args)
+    if not args.skip_pulp:
+        LOG.debug("Initializing pulp client")
+        pulp_c = setup_pulp_client(args)
     LOG.debug("Initializing iib client")
     iib_c = setup_iib_client(args)
     LOG.debug("Request to rebuild %s", args.index_image)
@@ -231,6 +238,17 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
         sys.exit(1)
 
     LOG.info("IIB build finished")
+    if args.skip_pulp:
+        json.dump(
+            build_details.to_dict(),
+            sys.stdout,
+            sort_keys=True,
+            indent=4,
+            separators=(",", ": "),
+        )
+        sys.stdout.write("\n")
+        return build_details
+
     LOG.debug("Getting pulp repository: %s", args.pulp_repository)
     container_repo = pulp_c.get_repository(args.pulp_repository)
     feed, path = build_details.index_image.split("/", 1)
@@ -242,7 +260,6 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
         )
     ).result()
     LOG.info("Publishing repository %s", args.pulp_repository)
-
     publish_args = [
         "--pulp-url",
         args.pulp_url,

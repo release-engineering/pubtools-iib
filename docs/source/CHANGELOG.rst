@@ -1,6 +1,10 @@
 ChangeLog
 =========
 
+Unreleased
+-----------
+* Added --skip-pulp attribute support
+
 0.12.0 (2020-03-30)
 -------------------
 * added --overwrite-index-image param

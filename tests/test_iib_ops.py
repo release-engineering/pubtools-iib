@@ -19,6 +19,36 @@ from utils import FakeTaskManager, FakeCollector
 
 fake_tm = FakeTaskManager()
 
+operator_1_push_item_pending = {
+    "state": "PENDING",
+    "origin": "index-image",
+    "filename": "operator-1",
+    "build": "feed.com/index/image:tag",
+    "dest": "redhat-operators",
+    "signing_key": None,
+    "checksums": None,
+    "src": "bundle1",
+}
+operator_1_push_item_notpushed = operator_1_push_item_pending.copy()
+operator_1_push_item_notpushed["state"] = "NOTPUSHED"
+operator_1_push_item_pushed = operator_1_push_item_pending.copy()
+operator_1_push_item_pushed["state"] = "PUSHED"
+
+operator_1_push_item_delete_pending = {
+    "state": "PENDING",
+    "origin": "index-image",
+    "filename": "operator-1",
+    "build": "feed.com/index/image:tag",
+    "dest": "redhat-operators",
+    "signing_key": None,
+    "checksums": None,
+    "src": None,
+}
+operator_1_push_item_deleted = operator_1_push_item_delete_pending.copy()
+operator_1_push_item_deleted["state"] = "DELETED"
+operator_1_push_item_delete_notpushed = operator_1_push_item_delete_pending.copy()
+operator_1_push_item_delete_notpushed["state"] = "NOTPUSHED"
+
 
 @contextlib.contextmanager
 def setup_entry_point_py(entry_tuple, environ_vars):
@@ -118,6 +148,100 @@ def fixture_common_iib_op_args():
     ]
 
 
+def add_bundles_mock_calls_tester(
+    fixture_iib_client,
+    fixture_pulplib_repo_sync,
+    fixture_pulplib_repo_publish,
+    fixture_iib_krb_auth,
+):
+    fixture_iib_client.return_value.add_bundles.assert_called_once_with(
+        "index-image",
+        "binary-image",
+        ["bundle1"],
+        ["arch"],
+        cnr_token="cnr_token",
+        organization="legacy-org",
+        overwrite_from_index=True,
+    )
+    fixture_iib_client.assert_called_once_with(
+        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
+    )
+    fixture_pulplib_repo_sync.assert_called_once()
+    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
+    fixture_pulplib_repo_publish.assert_called_once()
+
+
+def add_bundles_mock_calls_tester_not_called(
+    fixture_iib_client,
+    fixture_pulplib_repo_sync,
+    fixture_pulplib_repo_publish,
+    fixture_iib_krb_auth,
+):
+    fixture_iib_client.return_value.add_bundles.assert_called_once_with(
+        "index-image",
+        "binary-image",
+        ["bundle1"],
+        ["arch"],
+        cnr_token="cnr_token",
+        organization="legacy-org",
+        overwrite_from_index=True,
+    )
+    fixture_iib_client.assert_called_once_with(
+        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
+    )
+    fixture_pulplib_repo_sync.assert_not_called()
+    fixture_pulplib_repo_publish.assert_not_called()
+
+
+def remove_operators_mock_calls_tester_not_called(
+    fixture_iib_client,
+    fixture_pulplib_repo_sync,
+    fixture_pulplib_repo_publish,
+    fixture_iib_krb_auth,
+):
+    fixture_iib_client.assert_called_once_with(
+        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
+    )
+    fixture_iib_client.return_value.remove_operators.assert_called_once_with(
+        "index-image", "binary-image", ["1"], ["arch"], overwrite_from_index=True
+    )
+    fixture_pulplib_repo_sync.assert_not_called()
+    fixture_pulplib_repo_publish.assert_not_called()
+
+
+def remove_operators_mock_calls_tester(
+    fixture_iib_client,
+    fixture_pulplib_repo_sync,
+    fixture_pulplib_repo_publish,
+    fixture_iib_krb_auth,
+):
+    fixture_iib_client.assert_called_once_with(
+        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
+    )
+    fixture_iib_client.return_value.remove_operators.assert_called_once_with(
+        "index-image", "binary-image", ["1"], ["arch"], overwrite_from_index=True
+    )
+    fixture_pulplib_repo_sync.assert_called_once()
+    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
+
+    fixture_pulplib_repo_publish.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "extra_args,push_items,mock_calls_tester",
+    [
+        (
+            [],
+            [operator_1_push_item_pending, operator_1_push_item_pushed],
+            add_bundles_mock_calls_tester,
+        ),
+        (
+            ["--skip-pulp"],
+            [operator_1_push_item_pending],
+            add_bundles_mock_calls_tester_not_called,
+        ),
+    ],
+)
 def test_add_bundles_cli(
     fixture_iib_client,
     fixture_pulp_client,
@@ -127,6 +251,9 @@ def test_add_bundles_cli(
     fixture_container_image_repo,
     fixture_common_iib_op_args,
     fixture_pushcollector,
+    extra_args,
+    push_items,
+    mock_calls_tester,
 ):
 
     repo = fixture_container_image_repo
@@ -137,49 +264,18 @@ def test_add_bundles_cli(
         ("pubtools_iib", "console_scripts", "pubtools-iib-add-bundles"),
         "pubtools-iib-add-bundle",
         fixture_common_iib_op_args
-        + ["--bundle", "bundle1", "--iib-legacy-org", "legacy-org"],
+        + ["--bundle", "bundle1", "--iib-legacy-org", "legacy-org"]
+        + extra_args,
         {"PULP_PASSWORD": "pulp-password", "CNR_TOKEN": "cnr_token"},
     ) as entry_func:
         entry_func()
-    fixture_iib_client.assert_called_once_with(
-        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
+    assert fixture_pushcollector.items == push_items
+    mock_calls_tester(
+        fixture_iib_client,
+        fixture_pulplib_repo_sync,
+        fixture_pulplib_repo_publish,
+        fixture_iib_krb_auth,
     )
-    fixture_iib_client.return_value.add_bundles.assert_called_once_with(
-        "index-image",
-        "binary-image",
-        ["bundle1"],
-        ["arch"],
-        cnr_token="cnr_token",
-        organization="legacy-org",
-        overwrite_from_index=True,
-    )
-    fixture_pulplib_repo_sync.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
-
-    fixture_pulplib_repo_publish.assert_called_once()
-
-    assert fixture_pushcollector.items == [
-        {
-            "state": "PENDING",
-            "origin": "index-image",
-            "filename": "operator-1",
-            "build": "feed.com/index/image:tag",
-            "dest": "redhat-operators",
-            "signing_key": None,
-            "checksums": None,
-            "src": "bundle1",
-        },
-        {
-            "state": "PUSHED",
-            "origin": "index-image",
-            "filename": "operator-1",
-            "build": "feed.com/index/image:tag",
-            "dest": "redhat-operators",
-            "signing_key": None,
-            "checksums": None,
-            "src": "bundle1",
-        },
-    ]
 
 
 def test_add_bundles_cli_error(
@@ -216,26 +312,8 @@ def test_add_bundles_cli_error(
             pass
 
     assert fixture_pushcollector.items == [
-        {
-            "state": "PENDING",
-            "origin": "index-image",
-            "filename": "operator-1",
-            "build": "feed.com/index/image:tag",
-            "dest": "redhat-operators",
-            "signing_key": None,
-            "checksums": None,
-            "src": "bundle1",
-        },
-        {
-            "state": "NOTPUSHED",
-            "origin": "index-image",
-            "filename": "operator-1",
-            "build": "feed.com/index/image:tag",
-            "dest": "redhat-operators",
-            "signing_key": None,
-            "checksums": None,
-            "src": "bundle1",
-        },
+        operator_1_push_item_pending,
+        operator_1_push_item_notpushed,
     ]
 
 
@@ -279,6 +357,21 @@ def test_add_bundles_py(
     fixture_pulplib_repo_publish.assert_called_once()
 
 
+@pytest.mark.parametrize(
+    "extra_args,push_items,mock_calls_tester",
+    [
+        (
+            [],
+            [operator_1_push_item_delete_pending, operator_1_push_item_deleted],
+            remove_operators_mock_calls_tester,
+        ),
+        (
+            ["--skip-pulp"],
+            [operator_1_push_item_delete_pending],
+            remove_operators_mock_calls_tester_not_called,
+        ),
+    ],
+)
 def test_remove_operators_cli(
     fixture_iib_client,
     fixture_pulp_client,
@@ -288,6 +381,9 @@ def test_remove_operators_cli(
     fixture_container_image_repo,
     fixture_common_iib_op_args,
     fixture_pushcollector,
+    extra_args,
+    push_items,
+    mock_calls_tester,
 ):
 
     repo = fixture_container_image_repo
@@ -299,43 +395,17 @@ def test_remove_operators_cli(
     with setup_entry_point_cli(
         ("pubtools_iib", "console_scripts", "pubtools-iib-remove-operators"),
         "pubtools-iib-remove-operators",
-        fixture_common_iib_op_args + ["--operator", "op1"],
+        fixture_common_iib_op_args + ["--operator", "1"] + extra_args,
         {"PULP_PASSWORD": "pulp-password"},
     ) as entry_func:
         entry_func()
-    fixture_iib_client.assert_called_once_with(
-        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
+    assert fixture_pushcollector.items == push_items
+    mock_calls_tester(
+        fixture_iib_client,
+        fixture_pulplib_repo_sync,
+        fixture_pulplib_repo_publish,
+        fixture_iib_krb_auth,
     )
-    fixture_iib_client.return_value.remove_operators.assert_called_once_with(
-        "index-image", "binary-image", ["op1"], ["arch"], overwrite_from_index=True
-    )
-    fixture_pulplib_repo_sync.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
-
-    fixture_pulplib_repo_publish.assert_called_once()
-
-    assert fixture_pushcollector.items == [
-        {
-            "state": "PENDING",
-            "origin": "index-image",
-            "filename": "operator-op1",
-            "dest": "redhat-operators",
-            "build": "feed.com/index/image:tag",
-            "signing_key": None,
-            "checksums": None,
-            "src": None,
-        },
-        {
-            "state": "DELETED",
-            "origin": "index-image",
-            "filename": "operator-op1",
-            "dest": "redhat-operators",
-            "build": "feed.com/index/image:tag",
-            "signing_key": None,
-            "checksums": None,
-            "src": None,
-        },
-    ]
 
 
 def test_remove_operators_cli_error(
@@ -364,7 +434,7 @@ def test_remove_operators_cli_error(
     with setup_entry_point_cli(
         ("pubtools_iib", "console_scripts", "pubtools-iib-remove-operators"),
         "pubtools-iib-remove-operators",
-        fixture_common_iib_op_args + ["--operator", "op1"],
+        fixture_common_iib_op_args + ["--operator", "1"],
         {"PULP_PASSWORD": "pulp-password"},
     ) as entry_func:
         try:
@@ -374,26 +444,8 @@ def test_remove_operators_cli_error(
             pass
 
     assert fixture_pushcollector.items == [
-        {
-            "state": "PENDING",
-            "origin": "index-image",
-            "filename": "operator-op1",
-            "dest": "redhat-operators",
-            "build": "feed.com/index/image:tag",
-            "signing_key": None,
-            "checksums": None,
-            "src": None,
-        },
-        {
-            "state": "NOTPUSHED",
-            "origin": "index-image",
-            "filename": "operator-op1",
-            "dest": "redhat-operators",
-            "build": "feed.com/index/image:tag",
-            "signing_key": None,
-            "checksums": None,
-            "src": None,
-        },
+        operator_1_push_item_delete_pending,
+        operator_1_push_item_delete_notpushed,
     ]
 
 
@@ -414,22 +466,16 @@ def test_remove_operators_py(
         ("pubtools_iib", "console_scripts", "pubtools-iib-remove-operators"),
         {"PULP_PASSWORD": "pulp-password"},
     ) as entry_func:
-        retval = entry_func(
-            ["cmd"] + fixture_common_iib_op_args + ["--operator", "op1"]
-        )
+        retval = entry_func(["cmd"] + fixture_common_iib_op_args + ["--operator", "1"])
 
     assert isinstance(retval, IIBBuildDetailsModel)
 
-    fixture_iib_client.assert_called_once_with(
-        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
+    remove_operators_mock_calls_tester(
+        fixture_iib_client,
+        fixture_pulplib_repo_sync,
+        fixture_pulplib_repo_publish,
+        fixture_iib_krb_auth,
     )
-    fixture_iib_client.return_value.remove_operators.assert_called_once_with(
-        "index-image", "binary-image", ["op1"], ["arch"], overwrite_from_index=True
-    )
-    fixture_pulplib_repo_sync.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
-
-    fixture_pulplib_repo_publish.assert_called_once()
 
 
 def test_invalid_op(fixture_common_iib_op_args):
