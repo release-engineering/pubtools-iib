@@ -357,6 +357,48 @@ def test_add_bundles_py(
     fixture_pulplib_repo_publish.assert_called_once()
 
 
+def test_add_bundles_py_multiple_bundles(
+    fixture_iib_client,
+    fixture_pulp_client,
+    fixture_iib_krb_auth,
+    fixture_pulplib_repo_publish,
+    fixture_pulplib_repo_sync,
+    fixture_container_image_repo,
+    fixture_common_iib_op_args,
+):
+
+    repo = fixture_container_image_repo
+    fixture_pulp_client.return_value.search_repository.return_value = [repo]
+    fixture_pulp_client.return_value.get_repository.return_value = repo
+    with setup_entry_point_py(
+        ("pubtools_iib", "console_scripts", "pubtools-iib-add-bundles"),
+        {"PULP_PASSWORD": "pulp-password", "CNR_TOKEN": "cnr_token"},
+    ) as entry_func:
+        retval = entry_func(
+            ["cmd"]
+            + fixture_common_iib_op_args
+            + ["--bundle", "bundle1", "--bundle", "bundle2"]
+        )
+
+    assert isinstance(retval, IIBBuildDetailsModel)
+
+    fixture_iib_client.assert_called_once_with(
+        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
+    )
+    fixture_iib_client.return_value.add_bundles.assert_called_once_with(
+        "index-image",
+        "binary-image",
+        ["bundle1", "bundle2"],
+        ["arch"],
+        cnr_token="cnr_token",
+        overwrite_from_index=True,
+    )
+    fixture_pulplib_repo_sync.assert_called_once()
+    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
+
+    fixture_pulplib_repo_publish.assert_called_once()
+
+
 @pytest.mark.parametrize(
     "extra_args,push_items,mock_calls_tester",
     [
