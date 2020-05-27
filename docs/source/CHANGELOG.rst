@@ -4,7 +4,11 @@ ChangeLog
 Unreleased
 -----------
 
-0.12.0 (2020-04-29)
+0.14.0 (2020-05-27)
+-------------------
+* Fixed multiple argument passing to use 'append' mode
+
+0.13.0 (2020-04-29)
 -------------------
 * Added --skip-pulp attribute support
 
