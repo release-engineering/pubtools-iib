@@ -97,7 +97,7 @@ CMD_ARGS = {
         "help": "architecture to rebuild",
         "required": False,
         "type": str,
-        "count": "+",
+        "action": "append",
     },
     ("--overwrite-from-index",): {
         "group": "IIB service",
@@ -119,7 +119,7 @@ ADD_CMD_ARGS[("--bundle",)] = {
     "help": "<hostname>/<namespace>/<image>:<tag> of bundle",
     "required": True,
     "type": str,
-    "count": "+",
+    "action": "append",
 }
 ADD_CMD_ARGS[("--iib-legacy-org",)] = {
     "group": "IIB service",
@@ -134,7 +134,7 @@ RM_CMD_ARGS[("--operator",)] = {
     "help": "operator name",
     "required": True,
     "type": str,
-    "count": "+",
+    "action": "append",
 }
 
 
