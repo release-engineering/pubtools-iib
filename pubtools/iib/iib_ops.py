@@ -101,9 +101,23 @@ CMD_ARGS = {
     },
     ("--overwrite-from-index",): {
         "group": "IIB service",
-        "help": "overwrite from_index_image as output",
+        "help": (
+            "overwrite from_index_image as output. If this is true,"
+            " overwrite-from-index-token should also be specified."
+        ),
         "required": False,
         "type": bool,
+    },
+    ("--overwrite-from-index-token",): {
+        "group": "IIB service",
+        "help": (
+            "destination repo token to overwrite from_index_image"
+            "If this is specified, overwrite-from-index must be set to True."
+            "Or set the OVERWRITE_FROM_INDEX_TOKEN environment variable."
+        ),
+        "required": False,
+        "type": str,
+        "env_variable": "OVERWRITE_FROM_INDEX_TOKEN",
     },
     ("--skip-pulp",): {
         "group": "IIB service",
@@ -205,8 +219,12 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
         extra_args = {"cnr_token": args.iib_cnr_token}
         if args.iib_legacy_org:
             extra_args["organization"] = args.iib_legacy_org
+
     if args.overwrite_from_index:
         extra_args["overwrite_from_index"] = args.overwrite_from_index
+
+    if args.overwrite_from_index_token:
+        extra_args["overwrite_from_index_token"] = args.overwrite_from_index_token
 
     build_details = bundle_op(
         args.index_image,

@@ -1,4 +1,5 @@
 import contextlib
+from copy import deepcopy
 import mock
 import pkg_resources
 import pytest
@@ -162,6 +163,7 @@ def add_bundles_mock_calls_tester(
         cnr_token="cnr_token",
         organization="legacy-org",
         overwrite_from_index=True,
+        overwrite_from_index_token="overwrite_from_index_token",
     )
     fixture_iib_client.assert_called_once_with(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
@@ -185,6 +187,7 @@ def add_bundles_mock_calls_tester_not_called(
         cnr_token="cnr_token",
         organization="legacy-org",
         overwrite_from_index=True,
+        overwrite_from_index_token="overwrite_from_index_token",
     )
     fixture_iib_client.assert_called_once_with(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
@@ -203,7 +206,12 @@ def remove_operators_mock_calls_tester_not_called(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
     )
     fixture_iib_client.return_value.remove_operators.assert_called_once_with(
-        "index-image", "binary-image", ["1"], ["arch"], overwrite_from_index=True
+        "index-image",
+        "binary-image",
+        ["1"],
+        ["arch"],
+        overwrite_from_index=True,
+        overwrite_from_index_token="overwrite_from_index_token",
     )
     fixture_pulplib_repo_sync.assert_not_called()
     fixture_pulplib_repo_publish.assert_not_called()
@@ -219,7 +227,12 @@ def remove_operators_mock_calls_tester(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
     )
     fixture_iib_client.return_value.remove_operators.assert_called_once_with(
-        "index-image", "binary-image", ["1"], ["arch"], overwrite_from_index=True
+        "index-image",
+        "binary-image",
+        ["1"],
+        ["arch"],
+        overwrite_from_index=True,
+        overwrite_from_index_token="overwrite_from_index_token",
     )
     fixture_pulplib_repo_sync.assert_called_once()
     assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
@@ -266,7 +279,11 @@ def test_add_bundles_cli(
         fixture_common_iib_op_args
         + ["--bundle", "bundle1", "--iib-legacy-org", "legacy-org"]
         + extra_args,
-        {"PULP_PASSWORD": "pulp-password", "CNR_TOKEN": "cnr_token"},
+        {
+            "PULP_PASSWORD": "pulp-password",
+            "CNR_TOKEN": "cnr_token",
+            "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
+        },
     ) as entry_func:
         entry_func()
     assert fixture_pushcollector.items == push_items
@@ -303,7 +320,11 @@ def test_add_bundles_cli_error(
         ("pubtools_iib", "console_scripts", "pubtools-iib-add-bundles"),
         "pubtools-iib-add-bundle",
         fixture_common_iib_op_args + ["--bundle", "bundle1"],
-        {"PULP_PASSWORD": "pulp-password", "CNR_TOKEN": "cnr_token"},
+        {
+            "PULP_PASSWORD": "pulp-password",
+            "CNR_TOKEN": "cnr_token",
+            "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
+        },
     ) as entry_func:
         try:
             entry_func()
@@ -326,13 +347,16 @@ def test_add_bundles_py(
     fixture_container_image_repo,
     fixture_common_iib_op_args,
 ):
-
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
     with setup_entry_point_py(
         ("pubtools_iib", "console_scripts", "pubtools-iib-add-bundles"),
-        {"PULP_PASSWORD": "pulp-password", "CNR_TOKEN": "cnr_token"},
+        {
+            "PULP_PASSWORD": "pulp-password",
+            "CNR_TOKEN": "cnr_token",
+            "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
+        },
     ) as entry_func:
         retval = entry_func(
             ["cmd"] + fixture_common_iib_op_args + ["--bundle", "bundle1"]
@@ -350,6 +374,7 @@ def test_add_bundles_py(
         ["arch"],
         cnr_token="cnr_token",
         overwrite_from_index=True,
+        overwrite_from_index_token="overwrite_from_index_token",
     )
     fixture_pulplib_repo_sync.assert_called_once()
     assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
@@ -372,7 +397,11 @@ def test_add_bundles_py_multiple_bundles(
     fixture_pulp_client.return_value.get_repository.return_value = repo
     with setup_entry_point_py(
         ("pubtools_iib", "console_scripts", "pubtools-iib-add-bundles"),
-        {"PULP_PASSWORD": "pulp-password", "CNR_TOKEN": "cnr_token"},
+        {
+            "PULP_PASSWORD": "pulp-password",
+            "CNR_TOKEN": "cnr_token",
+            "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
+        },
     ) as entry_func:
         retval = entry_func(
             ["cmd"]
@@ -392,6 +421,7 @@ def test_add_bundles_py_multiple_bundles(
         ["arch"],
         cnr_token="cnr_token",
         overwrite_from_index=True,
+        overwrite_from_index_token="overwrite_from_index_token",
     )
     fixture_pulplib_repo_sync.assert_called_once()
     assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
@@ -438,7 +468,10 @@ def test_remove_operators_cli(
         ("pubtools_iib", "console_scripts", "pubtools-iib-remove-operators"),
         "pubtools-iib-remove-operators",
         fixture_common_iib_op_args + ["--operator", "1"] + extra_args,
-        {"PULP_PASSWORD": "pulp-password"},
+        {
+            "PULP_PASSWORD": "pulp-password",
+            "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
+        },
     ) as entry_func:
         entry_func()
     assert fixture_pushcollector.items == push_items
@@ -477,7 +510,10 @@ def test_remove_operators_cli_error(
         ("pubtools_iib", "console_scripts", "pubtools-iib-remove-operators"),
         "pubtools-iib-remove-operators",
         fixture_common_iib_op_args + ["--operator", "1"],
-        {"PULP_PASSWORD": "pulp-password"},
+        {
+            "PULP_PASSWORD": "pulp-password",
+            "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
+        },
     ) as entry_func:
         try:
             entry_func()
@@ -506,7 +542,10 @@ def test_remove_operators_py(
     fixture_pulp_client.return_value.get_repository.return_value = repo
     with setup_entry_point_py(
         ("pubtools_iib", "console_scripts", "pubtools-iib-remove-operators"),
-        {"PULP_PASSWORD": "pulp-password"},
+        {
+            "PULP_PASSWORD": "pulp-password",
+            "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
+        },
     ) as entry_func:
         retval = entry_func(["cmd"] + fixture_common_iib_op_args + ["--operator", "1"])
 
