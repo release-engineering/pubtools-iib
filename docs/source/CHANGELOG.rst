@@ -4,6 +4,11 @@ ChangeLog
 Unreleased
 -----------
 
+0.15.0 (2020-06-25)
+-------------------
+* Replaced content-delivery-release-bot with token
+* Added support for providing "overwrite-from-index-token" when calling IIB
+
 0.14.0 (2020-05-27)
 -------------------
 * Fixed multiple argument passing to use 'append' mode
