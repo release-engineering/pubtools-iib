@@ -131,7 +131,7 @@ ADD_CMD_ARGS = CMD_ARGS.copy()
 ADD_CMD_ARGS[("--bundle",)] = {
     "group": "IIB service",
     "help": "<hostname>/<namespace>/<image>:<tag> of bundle",
-    "required": True,
+    "required": False,
     "type": str,
     "action": "append",
 }
@@ -229,7 +229,7 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
     build_details = bundle_op(
         args.index_image,
         args.binary_image,
-        args.bundle if hasattr(args, "bundle") else args.operator,
+        args.bundle if operation == "add_bundles" else args.operator,
         args.arch,
         **extra_args
     )
