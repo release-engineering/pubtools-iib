@@ -89,7 +89,7 @@ CMD_ARGS = {
     ("--binary-image",): {
         "group": "IIB service",
         "help": "<hostname>/<namespace>/<image>:<tag> of binary image",
-        "required": True,
+        "required": False,
         "type": str,
     },
     ("--arch",): {
@@ -220,6 +220,9 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
         if args.iib_legacy_org:
             extra_args["organization"] = args.iib_legacy_org
 
+    if args.binary_image:
+        extra_args["binary_image"] = args.binary_image
+
     if args.overwrite_from_index:
         extra_args["overwrite_from_index"] = args.overwrite_from_index
 
@@ -228,7 +231,6 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
 
     build_details = bundle_op(
         args.index_image,
-        args.binary_image,
         args.bundle if operation == "add_bundles" else args.operator,
         args.arch,
         **extra_args
