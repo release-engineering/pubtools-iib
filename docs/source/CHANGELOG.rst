@@ -4,6 +4,11 @@ ChangeLog
 Unreleased
 -----------
 
+0.16.0 (2020-09-29)
+-------------------
+* Made --bundle an optional argument
+* Made --binary-image an optional argument
+
 0.15.0 (2020-06-25)
 -------------------
 * Replaced content-delivery-release-bot with token
