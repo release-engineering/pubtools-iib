@@ -66,15 +66,21 @@ def setup_entry_point_py(entry_tuple, environ_vars):
 @pytest.fixture
 def fixture_iib_client():
     with mock.patch("iiblib.iibclient.IIBClient") as iibc_patched:
-        iibc_patched.return_value.add_bundles.side_effect = lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
-            fake_tm.setup_task(*args, **kwargs)
+        iibc_patched.return_value.add_bundles.side_effect = (
+            lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
+                fake_tm.setup_task(*args, **kwargs)
+            )
         )
-        iibc_patched.return_value.remove_operators.side_effect = lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
-            fake_tm.setup_task(*args, **kwargs)
+        iibc_patched.return_value.remove_operators.side_effect = (
+            lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
+                fake_tm.setup_task(*args, **kwargs)
+            )
         )
         iibc_patched.return_value.get_build.side_effect = fake_tm.get_task
-        iibc_patched.return_value.wait_for_build.side_effect = lambda build_details: IIBBuildDetailsModel.from_dict(
-            fake_tm.get_task(build_details.id)
+        iibc_patched.return_value.wait_for_build.side_effect = (
+            lambda build_details: IIBBuildDetailsModel.from_dict(
+                fake_tm.get_task(build_details.id)
+            )
         )
         yield iibc_patched
 
@@ -157,11 +163,11 @@ def add_bundles_mock_calls_tester(
 ):
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
         "index-image",
-        "binary-image",
         ["bundle1"],
         ["arch"],
         cnr_token="cnr_token",
         organization="legacy-org",
+        binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
     )
@@ -181,11 +187,11 @@ def add_bundles_mock_calls_tester_not_called(
 ):
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
         "index-image",
-        "binary-image",
         ["bundle1"],
         ["arch"],
         cnr_token="cnr_token",
         organization="legacy-org",
+        binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
     )
@@ -207,9 +213,9 @@ def remove_operators_mock_calls_tester_not_called(
     )
     fixture_iib_client.return_value.remove_operators.assert_called_once_with(
         "index-image",
-        "binary-image",
         ["1"],
         ["arch"],
+        binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
     )
@@ -228,9 +234,9 @@ def remove_operators_mock_calls_tester(
     )
     fixture_iib_client.return_value.remove_operators.assert_called_once_with(
         "index-image",
-        "binary-image",
         ["1"],
         ["arch"],
+        binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
     )
@@ -309,10 +315,14 @@ def test_add_bundles_cli_error(
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
-    fixture_iib_client.return_value.add_bundles.side_effect = lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
-        fake_tm.setup_task(
-            *args,
-            **dict(list(kwargs.items()) + [("state_seq", ("in_progress", "failed"))])
+    fixture_iib_client.return_value.add_bundles.side_effect = (
+        lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
+            fake_tm.setup_task(
+                *args,
+                **dict(
+                    list(kwargs.items()) + [("state_seq", ("in_progress", "failed"))]
+                )
+            )
         )
     )
 
@@ -369,10 +379,10 @@ def test_add_bundles_py(
     )
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
         "index-image",
-        "binary-image",
         ["bundle1"],
         ["arch"],
         cnr_token="cnr_token",
+        binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
     )
@@ -416,10 +426,10 @@ def test_add_bundles_py_multiple_bundles(
     )
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
         "index-image",
-        "binary-image",
         ["bundle1", "bundle2"],
         ["arch"],
         cnr_token="cnr_token",
+        binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
     )
@@ -461,8 +471,12 @@ def test_remove_operators_cli(
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
-    fixture_iib_client.return_value.remove_operators.side_effect = lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
-        fake_tm.setup_task(*args, **dict(list(kwargs.items()) + [("op_type", "rm")]))
+    fixture_iib_client.return_value.remove_operators.side_effect = (
+        lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
+            fake_tm.setup_task(
+                *args, **dict(list(kwargs.items()) + [("op_type", "rm")])
+            )
+        )
     )
     with setup_entry_point_cli(
         ("pubtools_iib", "console_scripts", "pubtools-iib-remove-operators"),
@@ -497,12 +511,14 @@ def test_remove_operators_cli_error(
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
-    fixture_iib_client.return_value.remove_operators.side_effect = lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
-        fake_tm.setup_task(
-            *args,
-            **dict(
-                list(kwargs.items())
-                + [("state_seq", ("in_progress", "failed")), ("op_type", "rm")]
+    fixture_iib_client.return_value.remove_operators.side_effect = (
+        lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
+            fake_tm.setup_task(
+                *args,
+                **dict(
+                    list(kwargs.items())
+                    + [("state_seq", ("in_progress", "failed")), ("op_type", "rm")]
+                )
             )
         )
     )

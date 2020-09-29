@@ -12,9 +12,9 @@ class FakeTaskManager(object):
     def setup_task(
         self,
         index,
-        binary,
         map_or_op,
         arches,
+        binary_image="binary-image",
         state_seq=("in_progress", "finished"),
         op_type="add",
     ):
@@ -28,8 +28,8 @@ class FakeTaskManager(object):
             "from_index": index,
             "from_index_resolved": index + "-resolved",
             "bundles": map_or_op,
-            "binary_image": binary,
-            "binary_image_resolved": binary + "-resolved",
+            "binary_image": binary_image,
+            "binary_image_resolved": binary_image + "-resolved",
             "index_image": "index_image",
             "arches": arches,
         }
