@@ -11,7 +11,7 @@ from pubtools.iib.iib_ops import _iib_op_main
 import pushcollector
 
 
-from iiblib.iibclient import IIBBuildDetailsModel
+from iiblib.iib_build_details_model import IIBBuildDetailsModel
 from pubtools.pulplib import ContainerImageRepository
 from more_executors.futures import f_return
 
@@ -65,7 +65,7 @@ def setup_entry_point_py(entry_tuple, environ_vars):
 
 @pytest.fixture
 def fixture_iib_client():
-    with mock.patch("iiblib.iibclient.IIBClient") as iibc_patched:
+    with mock.patch("iiblib.iib_client.IIBClient") as iibc_patched:
         iibc_patched.return_value.add_bundles.side_effect = (
             lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
                 fake_tm.setup_task(*args, **kwargs)
@@ -97,7 +97,7 @@ def fixture_pushcollector():
 
 @pytest.fixture
 def fixture_iib_krb_auth():
-    with mock.patch("iiblib.iibclient.IIBKrbAuth") as iib_krbauth_patched:
+    with mock.patch("iiblib.iib_authentication.IIBKrbAuth") as iib_krbauth_patched:
         iib_krbauth_patched.return_value = mock.MagicMock(name="MockedIIBKrbAuth")
         yield iib_krbauth_patched
 

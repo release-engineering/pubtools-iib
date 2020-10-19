@@ -4,14 +4,12 @@ import os
 import sys
 import pkg_resources
 
-from iiblib import iibclient
+from iiblib import iib_client, iib_authentication
 from pubtools import pulplib
-
-from iiblib.iibclient import IIBBuildDetailsModel
 
 
 def setup_iib_client(parsed_args):
-    iib_auth = iibclient.IIBKrbAuth(
+    iib_auth = iib_authentication.IIBKrbAuth(
         parsed_args.iib_krb_principal,
         parsed_args.iib_server,
         ktfile=parsed_args.iib_krb_ktfile,
@@ -21,7 +19,7 @@ def setup_iib_client(parsed_args):
     }
     if parsed_args.iib_insecure:
         kwargs["ssl_verify"] = False
-    iibc = iibclient.IIBClient(parsed_args.iib_server, **kwargs)
+    iibc = iib_client.IIBClient(parsed_args.iib_server, **kwargs)
     return iibc
 
 

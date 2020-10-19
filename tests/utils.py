@@ -1,6 +1,3 @@
-from iiblib.iibclient import IIBBuildDetailsModel
-
-
 class FakeTaskManager(object):
     def __init__(self):
         self.tasks = {}
