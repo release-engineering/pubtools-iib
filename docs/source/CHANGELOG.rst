@@ -4,6 +4,10 @@ ChangeLog
 Unreleased
 -----------
 
+0.17.0 (2020-10-19)
+-------------------
+* Change IIBlib imports
+
 0.16.0 (2020-09-29)
 -------------------
 * Made --bundle an optional argument
