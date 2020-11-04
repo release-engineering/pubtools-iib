@@ -312,6 +312,10 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
         indent=4,
         separators=(",", ": "),
     )
+
+    build_details_url = _make_iib_build_details_url(args.iib_server, build_details.id)
+    LOG.info("IIB details: %s", build_details_url)
+
     sys.stdout.write("\n")
     return build_details
 
@@ -344,3 +348,7 @@ def remove_operators_main(sysargs=None):
     process_parsed_args(args, RM_CMD_ARGS)
 
     return _iib_op_main(args, "remove_operators", "DELETED")
+
+
+def _make_iib_build_details_url(host, task_id):
+    return "https://%s/api/v1/builds/%s" % (host, task_id)
