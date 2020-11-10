@@ -241,31 +241,21 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
     pc.update_push_items(push_items)
 
     build_details = iib_c.wait_for_build(build_details)
+
+    build_details_url = _make_iib_build_details_url(args.iib_server, build_details.id)
+    LOG.info("IIB details: %s", build_details_url)
+
     if build_details.state == "failed":
         LOG.error("IIB operation failed")
         push_items = push_items_from_build(
             build_details, "NOTPUSHED", args.pulp_repository
         )
         pc.update_push_items(push_items)
-        json.dump(
-            build_details.to_dict(),
-            sys.stderr,
-            sort_keys=True,
-            indent=4,
-            separators=(",", ": "),
-        )
         sys.stderr.write("\n")
         sys.exit(1)
 
     LOG.info("IIB build finished")
     if args.skip_pulp:
-        json.dump(
-            build_details.to_dict(),
-            sys.stdout,
-            sort_keys=True,
-            indent=4,
-            separators=(",", ": "),
-        )
         sys.stdout.write("\n")
         return build_details
 
@@ -305,16 +295,6 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
     )
     LOG.info("IIB push finished")
     pc.update_push_items(push_items)
-    json.dump(
-        build_details.to_dict(),
-        sys.stdout,
-        sort_keys=True,
-        indent=4,
-        separators=(",", ": "),
-    )
-
-    build_details_url = _make_iib_build_details_url(args.iib_server, build_details.id)
-    LOG.info("IIB details: %s", build_details_url)
 
     sys.stdout.write("\n")
     return build_details

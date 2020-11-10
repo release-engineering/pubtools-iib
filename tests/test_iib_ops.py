@@ -352,6 +352,7 @@ def test_add_bundles_cli_error(
 
 def test_add_bundles_py(
     caplog,
+    capsys,
     fixture_iib_client,
     fixture_pulp_client,
     fixture_iib_krb_auth,
@@ -399,6 +400,10 @@ def test_add_bundles_py(
         FIXTURE_IIB_SERVER, task_id
     )
     assert url_msg in caplog.messages
+
+    # build details should not be dumped into stdout
+    captured = capsys.readouterr()
+    assert '"id": "{}"'.format(task_id) not in captured.out
 
 
 def test_add_bundles_py_multiple_bundles(
