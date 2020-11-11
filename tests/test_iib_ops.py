@@ -401,9 +401,9 @@ def test_add_bundles_py(
     )
     assert url_msg in caplog.messages
 
-    # build details should not be dumped into stdout
+    # neither build details nor anything else dumped into stdout
     captured = capsys.readouterr()
-    assert '"id": "{}"'.format(task_id) not in captured.out
+    assert not captured.out
 
 
 def test_add_bundles_py_multiple_bundles(

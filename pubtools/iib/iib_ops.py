@@ -251,12 +251,10 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
             build_details, "NOTPUSHED", args.pulp_repository
         )
         pc.update_push_items(push_items)
-        sys.stderr.write("\n")
         sys.exit(1)
 
     LOG.info("IIB build finished")
     if args.skip_pulp:
-        sys.stdout.write("\n")
         return build_details
 
     LOG.debug("Getting pulp repository: %s", args.pulp_repository)
@@ -296,7 +294,6 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
     LOG.info("IIB push finished")
     pc.update_push_items(push_items)
 
-    sys.stdout.write("\n")
     return build_details
 
 
