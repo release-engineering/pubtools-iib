@@ -1,5 +1,4 @@
 import contextlib
-from copy import deepcopy
 import mock
 import pkg_resources
 import pytest
@@ -16,6 +15,9 @@ from pubtools.pulplib import ContainerImageRepository
 from more_executors.futures import f_return
 
 from utils import FakeTaskManager, FakeCollector
+
+
+FIXTURE_IIB_SERVER = "iib-server"
 
 
 fake_tm = FakeTaskManager()
@@ -141,7 +143,7 @@ def fixture_common_iib_op_args():
         "pulp-user",
         "--pulp-insecure",
         "--iib-server",
-        "iib-server",
+        FIXTURE_IIB_SERVER,
         "--index-image",
         "index-image",
         "--binary-image",
@@ -349,6 +351,8 @@ def test_add_bundles_cli_error(
 
 
 def test_add_bundles_py(
+    caplog,
+    capsys,
     fixture_iib_client,
     fixture_pulp_client,
     fixture_iib_krb_auth,
@@ -390,6 +394,16 @@ def test_add_bundles_py(
     assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
 
     fixture_pulplib_repo_publish.assert_called_once()
+
+    task_id = retval.id
+    url_msg = "IIB details: https://{}/api/v1/builds/{}".format(
+        FIXTURE_IIB_SERVER, task_id
+    )
+    assert url_msg in caplog.messages
+
+    # neither build details nor anything else dumped into stdout
+    captured = capsys.readouterr()
+    assert not captured.out
 
 
 def test_add_bundles_py_multiple_bundles(
