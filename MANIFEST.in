@@ -3,3 +3,4 @@ include README.rst
 include LICENSE
 recursive-include docs *.rst conf.py Makefile
 recursive-include pubtools_iib *.py
+include requirements.txt

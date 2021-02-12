@@ -30,19 +30,24 @@ class FakeTaskManager(object):
             "state_reason": "state_reason",
             "state_history": [],
             "from_index": index,
+            "bundles": map_or_op,
             "from_index_resolved": index + "-resolved",
             "binary_image": binary_image,
             "binary_image_resolved": binary_image + "-resolved",
             "bundle_mapping": {},
             "index_image": "feed.com/index/image:tag",
             "arches": arches,
+            "batch": 123,
+            "updated": "2020-05-26T19:33:58.759687Z",
+            "user": "tbrady@DOMAIN.LOCAL",
+            "removed_operators": ["operator-%s" % k for k in map_or_op],
+            "organization": None,
+            "omps_operator_version": {},
+            "distribution_scope": "",
         }
 
         if op_type == "rm":
             self.tasks[tid]["request_type"] = "rm"
-            self.tasks[tid]["removed_operators"] = [
-                "operator-%s" % k for k in map_or_op
-            ]
         if op_type == "add":
             self.tasks[tid]["request_type"] = "add"
             self.tasks[tid]["bundle_mapping"] = {"operator-1": map_or_op}
