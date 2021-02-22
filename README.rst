@@ -30,6 +30,7 @@ Setup
 Usage
 =====
 
+Push the created index image to Pulp
 ::
 
   $ export PULP_PASSWORD="pulppassword"
@@ -41,6 +42,7 @@ Usage
     --index-image container-registry.example.com/index/image:latest
     --bundle container-registry.example.com/bundle/image:123
     --arch x86_64
+    --skip-quay
 
   $ export PULP_PASSWORD="pulppassword"
   $ pubtools-iib-remove-operators --pulp-url https://pulphost.example.com/\
@@ -51,4 +53,30 @@ Usage
     --index-image container-registry.example.com/index/image:latest
     --operator bundle/image:123
     --arch x86_64
+    --skip-quay
+
+Push the created index image to Quay in a remote server and send a UMB message
+::
+
+  $ export QUAY_PASSWORD=quay_password
+  $ export SSH_PASSWORD=ssh_password
+  $ pubtools-iib-add-bundles \
+    --iib-server iibhostname.example.com \
+    --binary-image container-registry.example.com/binary/image:latest \
+    --index-image container-registry.example.com/index/image:latest \
+    --bundle container-registry.example.com/bundle/image:123 \
+    --arch x86_64 \
+    --skip-pulp \
+    --quay-dest-repo quay.io/namespace/repo \
+    --quay-user namespace+robot_account \
+    --quay-remote-exec \
+    --quay-ssh-remote-host 127.0.0.1 \
+    --quay-ssh-remote-host-port 2222 \
+    --quay-ssh-username ssh_user \
+    --quay-send-umb-msg \
+    --quay-umb-url amqps://umb-url1:5671 \
+    --quay-umb-url amqps://umb-url2:5671 \
+    --quay-umb-cert /path/to/file.crt \
+    --quay-umb-client-key /path/to/file.key \
+    --quay-umb-ca-cert /path/to/cacert.crt
 
