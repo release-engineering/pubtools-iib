@@ -213,6 +213,56 @@ def add_bundles_mock_calls_tester(
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
+        deprecation_list=["bundle1"],
+    )
+    fixture_iib_client.assert_called_once_with(
+        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
+    )
+    fixture_pulplib_repo_sync.assert_called_once()
+    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
+    fixture_pulplib_repo_publish.assert_called_once()
+
+
+def add_bundles_mock_calls_tester_empty_deprecation_list(
+    fixture_iib_client,
+    fixture_pulplib_repo_sync,
+    fixture_pulplib_repo_publish,
+    fixture_iib_krb_auth,
+):
+    fixture_iib_client.return_value.add_bundles.assert_called_once_with(
+        "index-image",
+        ["bundle1"],
+        ["arch"],
+        cnr_token="cnr_token",
+        organization="legacy-org",
+        binary_image="binary-image",
+        overwrite_from_index=True,
+        overwrite_from_index_token="overwrite_from_index_token",
+    )
+    fixture_iib_client.assert_called_once_with(
+        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
+    )
+    fixture_pulplib_repo_sync.assert_called_once()
+    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
+    fixture_pulplib_repo_publish.assert_called_once()
+
+
+def add_bundles_mock_calls_tester_deprecation_bundles(
+    fixture_iib_client,
+    fixture_pulplib_repo_sync,
+    fixture_pulplib_repo_publish,
+    fixture_iib_krb_auth,
+):
+    fixture_iib_client.return_value.add_bundles.assert_called_once_with(
+        "index-image",
+        ["bundle1"],
+        ["arch"],
+        cnr_token="cnr_token",
+        organization="legacy-org",
+        binary_image="binary-image",
+        overwrite_from_index=True,
+        overwrite_from_index_token="overwrite_from_index_token",
+        deprecation_list=["bundle1", "bundle2"],
     )
     fixture_iib_client.assert_called_once_with(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
@@ -293,9 +343,19 @@ def remove_operators_mock_calls_tester(
     "extra_args,push_items,mock_calls_tester",
     [
         (
-            [],
+            ["--deprecation-list", "bundle1,bundle2"],
+            [operator_1_push_item_pending, operator_1_push_item_pushed],
+            add_bundles_mock_calls_tester_deprecation_bundles,
+        ),
+        (
+            ["--deprecation-list", "bundle1"],
             [operator_1_push_item_pending, operator_1_push_item_pushed],
             add_bundles_mock_calls_tester,
+        ),
+        (
+            ["--deprecation-list", ""],
+            [operator_1_push_item_pending, operator_1_push_item_pushed],
+            add_bundles_mock_calls_tester_empty_deprecation_list,
         ),
         (
             ["--skip-pulp"],
