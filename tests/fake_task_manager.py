@@ -31,6 +31,7 @@ class FakeTaskManager(object):
             "binary_image": binary_image,
             "binary_image_resolved": binary_image + "-resolved",
             "index_image": "index_image",
+            "index_image_resolved": "index_image_resolved",
             "arches": arches,
         }
         import sys
