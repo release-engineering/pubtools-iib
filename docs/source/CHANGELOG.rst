@@ -4,6 +4,13 @@ ChangeLog
 Unreleased
 -----------
 
+0.18.0 (2020-03-29)
+-------------------
+* Add deprecation_list and index_image_resolved attribute
+* Add option of pushing to Quay
+* Add log links to build details
+* Remove duplicated FakeTaskManager
+
 0.17.0 (2020-10-19)
 -------------------
 * Change IIBlib imports
