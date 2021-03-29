@@ -43,6 +43,7 @@ Push the created index image to Pulp
     --bundle container-registry.example.com/bundle/image:123
     --arch x86_64
     --skip-quay
+    --deprecation-list container-registry.example.com/index/bundle-image:latest,container-registry.example.com/index/bundle-image:2
 
   $ export PULP_PASSWORD="pulppassword"
   $ pubtools-iib-remove-operators --pulp-url https://pulphost.example.com/\

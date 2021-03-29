@@ -49,9 +49,11 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 
+
 def get_requirements():
     with open("requirements.txt") as f:
         return f.read().splitlines()
+
 
 DEPENDENCY_LINKS = []
 

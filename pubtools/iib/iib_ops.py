@@ -248,6 +248,12 @@ ADD_CMD_ARGS[("--iib-legacy-org",)] = {
     "required": False,
     "type": str,
 }
+ADD_CMD_ARGS[("--deprecation-list",)] = {
+    "group": "IIB service",
+    "help": "Comma separated list of deprecated bundles",
+    "required": False,
+    "type": str,
+}
 
 RM_CMD_ARGS = CMD_ARGS.copy()
 RM_CMD_ARGS[("--operator",)] = {
@@ -529,6 +535,8 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
         extra_args = {"cnr_token": args.iib_cnr_token}
         if args.iib_legacy_org:
             extra_args["organization"] = args.iib_legacy_org
+        if args.deprecation_list:
+            extra_args["deprecation_list"] = args.deprecation_list.split(",")
 
     if args.binary_image:
         extra_args["binary_image"] = args.binary_image
