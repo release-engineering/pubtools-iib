@@ -4,9 +4,10 @@ ChangeLog
 Unreleased
 -----------
 
-0.18.1 (2021-03-31)
+0.18.2 (2021-03-31)
 -------------------
 * Change iiblib version to 3.0.0.
+* Fix requirements dependency
 
 0.18.0 (2021-03-29)
 -------------------
