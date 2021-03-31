@@ -4,7 +4,11 @@ ChangeLog
 Unreleased
 -----------
 
-0.18.0 (2020-03-29)
+0.18.1 (2021-03-31)
+-------------------
+* Change iiblib version to 3.0.0.
+
+0.18.0 (2021-03-29)
 -------------------
 * Add deprecation_list and index_image_resolved attribute
 * Add option of pushing to Quay
