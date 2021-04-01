@@ -49,11 +49,7 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 
-
-def get_requirements():
-    with open("requirements.txt") as f:
-        return f.read().splitlines()
-
+INSTALL_REQURIES = ["setuptools", "pubtools-pulplib", "pubtools-pulp", "iiblib"]
 
 DEPENDENCY_LINKS = []
 
@@ -77,7 +73,7 @@ setup(
     classifiers=classifiers,
     packages=find_packages(exclude=["tests"]),
     data_files=[],
-    install_requires=get_requirements(),
+    install_requires=INSTALL_REQURIES,
     dependency_links=DEPENDENCY_LINKS,
     entry_points={
         "console_scripts": [
