@@ -49,13 +49,11 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 
+INSTALL_REQURIES = ["setuptools", "pubtools-pulplib", "pubtools-pulp", "iiblib"]
 
-def get_requirements():
-    with open("requirements.txt") as f:
-        return f.read().splitlines()
-
-
-DEPENDENCY_LINKS = []
+DEPENDENCY_LINKS = [
+    "git+https://gitlab.cee.redhat.com/jluza/iiblib.git@master#egg=iiblib",
+]
 
 
 long_description = read_content("README.rst") + read_content(
@@ -77,7 +75,7 @@ setup(
     classifiers=classifiers,
     packages=find_packages(exclude=["tests"]),
     data_files=[],
-    install_requires=get_requirements(),
+    install_requires=INSTALL_REQURIES,
     dependency_links=DEPENDENCY_LINKS,
     entry_points={
         "console_scripts": [

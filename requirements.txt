@@ -5,4 +5,3 @@ pushcollector
 pubtools-pulp
 iiblib>=3.0.0
 pubtools-pulplib
-pubtools-quay
