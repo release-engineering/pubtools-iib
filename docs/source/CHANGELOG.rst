@@ -4,6 +4,11 @@ ChangeLog
 Unreleased
 -----------
 
+0.19.0 (2021-04-01)
+-------------------
+* Remove option of pushing to Quay
+* Restore original installation of dependencies
+
 0.18.1 (2021-03-31)
 -------------------
 * Change iiblib version to 3.0.0.
