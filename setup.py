@@ -51,9 +51,7 @@ classifiers = [
 
 INSTALL_REQURIES = ["setuptools", "pubtools-pulplib", "pubtools-pulp", "iiblib"]
 
-DEPENDENCY_LINKS = [
-    "git+https://gitlab.cee.redhat.com/jluza/iiblib.git@master#egg=iiblib",
-]
+DEPENDENCY_LINKS = []
 
 
 long_description = read_content("README.rst") + read_content(
