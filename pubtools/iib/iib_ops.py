@@ -20,13 +20,13 @@ CMD_ARGS = {
     ("--pulp-url",): {
         "group": "Pulp environment",
         "help": "Pulp server URL",
-        "required": True,
+        "required": False,
         "type": str,
     },
     ("--pulp-user",): {
         "group": "Pulp environment",
         "help": "Pulp username",
-        "required": True,
+        "required": False,
         "type": str,
     },
     ("--pulp-password",): {
