@@ -4,6 +4,10 @@ ChangeLog
 Unreleased
 -----------
 
+0.20.0 (2021-06-10)
+-------------------
+* Make Pulp-related arguments non-mandatory
+
 0.19.0 (2021-04-01)
 -------------------
 * Remove option of pushing to Quay
