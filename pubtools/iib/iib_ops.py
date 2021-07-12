@@ -13,8 +13,8 @@ from .utils import (
 from pubtools import pulplib
 import pushcollector
 
-LOG = logging.getLogger()
-LOG.setLevel(logging.INFO)
+LOG = logging.getLogger("pubtools.iib")
+
 
 CMD_ARGS = {
     ("--pulp-url",): {
@@ -314,6 +314,8 @@ def make_rm_operators_parser():
 
 
 def add_bundles_main(sysargs=None):
+    logging.basicConfig(level=logging.INFO)
+
     parser = make_add_bundles_parser()
     if sysargs:
         args = parser.parse_args(sysargs[1:])
@@ -325,6 +327,8 @@ def add_bundles_main(sysargs=None):
 
 
 def remove_operators_main(sysargs=None):
+    logging.basicConfig(level=logging.INFO)
+
     parser = make_rm_operators_parser()
     if sysargs:
         args = parser.parse_args(sysargs[1:])

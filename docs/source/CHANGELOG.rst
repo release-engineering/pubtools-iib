@@ -3,6 +3,7 @@ ChangeLog
 
 Unreleased
 -----------
+* Use pubtools.iib logger rather than root logger
 
 0.20.0 (2021-06-10)
 -------------------

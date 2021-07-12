@@ -1,4 +1,5 @@
 import contextlib
+import logging
 import mock
 import pkg_resources
 import pytest
@@ -421,6 +422,7 @@ def test_add_bundles_py(
     fixture_container_image_repo,
     fixture_common_iib_op_args,
 ):
+    caplog.set_level(logging.INFO)
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
