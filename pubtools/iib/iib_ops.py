@@ -125,6 +125,13 @@ CMD_ARGS = {
         "required": False,
         "type": bool,
     },
+    ("--build-tag",): {
+        "group": "IIB service",
+        "help": "extra tags to apply on built index image in temp namespace",
+        "required": False,
+        "type": str,
+        "action": "append",
+    },
 }
 
 ADD_CMD_ARGS = CMD_ARGS.copy()
@@ -236,6 +243,9 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
 
     if args.overwrite_from_index_token:
         extra_args["overwrite_from_index_token"] = args.overwrite_from_index_token
+
+    if args.build_tag:
+        extra_args["build_tags"] = args.build_tag
 
     build_details = bundle_op(
         args.index_image,

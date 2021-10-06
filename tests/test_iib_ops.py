@@ -155,6 +155,10 @@ def fixture_common_iib_op_args():
         "example@REALM",
         "--iib-insecure",
         "--overwrite-from-index",
+        "--build-tag",
+        "extra-tag-1",
+        "--build-tag",
+        "extra-tag-2",
     ]
 
 
@@ -174,6 +178,7 @@ def add_bundles_mock_calls_tester(
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
         deprecation_list=["bundle1"],
+        build_tags=["extra-tag-1", "extra-tag-2"],
     )
     fixture_iib_client.assert_called_once_with(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
@@ -198,6 +203,7 @@ def add_bundles_mock_calls_tester_empty_deprecation_list(
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
+        build_tags=["extra-tag-1", "extra-tag-2"],
     )
     fixture_iib_client.assert_called_once_with(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
@@ -223,6 +229,7 @@ def add_bundles_mock_calls_tester_deprecation_bundles(
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
         deprecation_list=["bundle1", "bundle2"],
+        build_tags=["extra-tag-1", "extra-tag-2"],
     )
     fixture_iib_client.assert_called_once_with(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
@@ -247,6 +254,7 @@ def add_bundles_mock_calls_tester_not_called(
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
+        build_tags=["extra-tag-1", "extra-tag-2"],
     )
     fixture_iib_client.assert_called_once_with(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
@@ -271,6 +279,7 @@ def remove_operators_mock_calls_tester_not_called(
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
+        build_tags=["extra-tag-1", "extra-tag-2"],
     )
     fixture_pulplib_repo_sync.assert_not_called()
     fixture_pulplib_repo_publish.assert_not_called()
@@ -292,6 +301,7 @@ def remove_operators_mock_calls_tester(
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
+        build_tags=["extra-tag-1", "extra-tag-2"],
     )
     fixture_pulplib_repo_sync.assert_called_once()
     assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
@@ -451,6 +461,7 @@ def test_add_bundles_py(
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
+        build_tags=["extra-tag-1", "extra-tag-2"],
     )
     fixture_pulplib_repo_sync.assert_called_once()
     assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
@@ -461,7 +472,7 @@ def test_add_bundles_py(
     url_msg = "IIB details: https://{}/api/v1/builds/{}".format(
         FIXTURE_IIB_SERVER, task_id
     )
-    assert url_msg in caplog.messages
+    assert url_msg in [r.getMessage() for r in caplog.records]
 
     # neither build details nor anything else dumped into stdout
     captured = capsys.readouterr()
@@ -508,6 +519,7 @@ def test_add_bundles_py_multiple_bundles(
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
+        build_tags=["extra-tag-1", "extra-tag-2"],
     )
     fixture_pulplib_repo_sync.assert_called_once()
     assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"

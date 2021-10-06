@@ -22,6 +22,7 @@ class FakeTaskManager(object):
         state_seq=("in_progress", "finished"),
         op_type="add",
         deprecation_list=None,
+        build_tags=None,
     ):
         tid = self._gen_task_id()
         self.task_state_seq[tid] = list(state_seq)
