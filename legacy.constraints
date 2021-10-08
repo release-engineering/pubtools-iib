@@ -1,6 +1,6 @@
 # These constraints are applied during testing with python2.
 # Old versions of libraries can be added here if you want to
-# ensure pubtools-quay works with those.
+# ensure pubtools-iib works with those.
 PyYAML < 5.1
 jsonschema==2.3.0
 pluggy==0.5.2
