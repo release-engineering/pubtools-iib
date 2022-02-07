@@ -48,6 +48,7 @@ class FakeTaskManager(object):
             "omps_operator_version": {},
             "distribution_scope": "",
             "deprecation_list": [] if not deprecation_list else deprecation_list,
+            "build_tags": build_tags,
         }
 
         if op_type == "rm":

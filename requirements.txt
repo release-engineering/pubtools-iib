@@ -3,5 +3,5 @@ setuptools
 pyrsistent<=0.16.0; python_version == '2.7'
 pushcollector
 pubtools-pulp
-iiblib>=3.0.0
+iiblib>=5.0.1
 pubtools-pulplib
