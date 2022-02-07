@@ -3,6 +3,10 @@ ChangeLog
 
 Unreleased
 -----------
+
+0.21.0 (2022-02-07)
+-------------------
+* Added build_tags support
 * Use pubtools.iib logger rather than root logger
 
 0.20.0 (2021-06-10)
