@@ -20,14 +20,14 @@ sys.path.append(os.path.abspath("../.."))
 
 # -- Project information -----------------------------------------------------
 
-project = u"pubtools-iib"
-copyright = u"2020, Jindrich Luza"
-author = u"Jindrich Luza"
+project = "pubtools-iib"
+copyright = "2020, Jindrich Luza"
+author = "Jindrich Luza"
 
 # The short X.Y version
-version = u"0.1"
+version = "0.1"
 # The full version, including alpha/beta/rc tags
-release = u"0.1.0"
+release = "0.1.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -58,7 +58,7 @@ master_doc = "index"
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = u"en"
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -128,8 +128,8 @@ latex_documents = [
     (
         master_doc,
         "pubtools-iib.tex",
-        u"pubtools-iib Documentation",
-        u"Jindrich Luza",
+        "pubtools-iib Documentation",
+        "Jindrich Luza",
         "manual",
     )
 ]
@@ -139,7 +139,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "pubtools-iib", u"pubtools-iib Documentation", [author], 1)]
+man_pages = [(master_doc, "pubtools-iib", "pubtools-iib Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -151,7 +151,7 @@ texinfo_documents = [
     (
         master_doc,
         "pubtools-iib",
-        u"pubtools-iib Documentation",
+        "pubtools-iib Documentation",
         author,
         "pubtools-iib",
         "One line description of project.",
