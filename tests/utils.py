@@ -39,6 +39,8 @@ class FakeTaskManager(object):
             "bundle_mapping": {},
             "index_image": "feed.com/index/image:tag",
             "index_image_resolved": "fake-example.com/index/image-resolved:tag",
+            "internal_index_image_copy": "feed.com/index/image:tag",
+            "internal_index_image_copy_resolved": "fake-example.com/index/image-resolved:tag",
             "arches": arches,
             "batch": 123,
             "updated": "2020-05-26T19:33:58.759687Z",
