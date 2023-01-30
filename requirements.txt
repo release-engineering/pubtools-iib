@@ -1,6 +1,4 @@
-six
 setuptools<60.9.0 # remove when https://github.com/pypa/setuptools/issues/3293 is fixed
-pyrsistent<=0.16.0; python_version == '2.7'
 pushcollector
 pubtools-pulp
 iiblib>=5.0.1
