@@ -71,6 +71,7 @@ setup(
     author_email="jluza@redhat.com",
     url="https://gitlab.cee.redhat.com/jluza/pubtools-iib",
     classifiers=classifiers,
+    python_requires=">=3.6",
     packages=find_packages(exclude=["tests"]),
     data_files=[],
     install_requires=INSTALL_REQURIES,
