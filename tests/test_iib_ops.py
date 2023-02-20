@@ -81,9 +81,7 @@ def fixture_iib_client():
         )
         iibc_patched.return_value.get_build.side_effect = fake_tm.get_task
         iibc_patched.return_value.wait_for_build.side_effect = (
-            lambda build_details: IIBBuildDetailsModel.from_dict(
-                fake_tm.get_task(build_details.id)
-            )
+            lambda build_details: IIBBuildDetailsModel.from_dict(fake_tm.get_task(build_details.id))
         )
         yield iibc_patched
 
@@ -91,9 +89,7 @@ def fixture_iib_client():
 @pytest.fixture
 def fixture_pushcollector():
     fake_collector = FakeCollector()
-    pushcollector.Collector.register_backend(
-        "pubtools-ibb-test", lambda: fake_collector
-    )
+    pushcollector.Collector.register_backend("pubtools-ibb-test", lambda: fake_collector)
     pushcollector.Collector.set_default_backend("pubtools-ibb-test")
     yield fake_collector
 
@@ -113,18 +109,14 @@ def fixture_pulp_client():
 
 @pytest.fixture
 def fixture_pulplib_repo_publish():
-    with mock.patch(
-        "pubtools.pulplib.ContainerImageRepository.publish"
-    ) as repo_publish_patched:
+    with mock.patch("pubtools.pulplib.ContainerImageRepository.publish") as repo_publish_patched:
         repo_publish_patched.return_value = f_return()
         yield repo_publish_patched
 
 
 @pytest.fixture
 def fixture_pulplib_repo_sync():
-    with mock.patch(
-        "pubtools.pulplib.ContainerImageRepository.sync"
-    ) as repo_sync_patched:
+    with mock.patch("pubtools.pulplib.ContainerImageRepository.sync") as repo_sync_patched:
         yield repo_sync_patched
 
 
@@ -347,7 +339,6 @@ def test_add_bundles_cli(
     push_items,
     mock_calls_tester,
 ):
-
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
@@ -384,17 +375,13 @@ def test_add_bundles_cli_error(
     fixture_common_iib_op_args,
     fixture_pushcollector,
 ):
-
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
     fixture_iib_client.return_value.add_bundles.side_effect = (
         lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
             fake_tm.setup_task(
-                *args,
-                **dict(
-                    list(kwargs.items()) + [("state_seq", ("in_progress", "failed"))]
-                )
+                *args, **dict(list(kwargs.items()) + [("state_seq", ("in_progress", "failed"))])
             )
         )
     )
@@ -444,9 +431,7 @@ def test_add_bundles_py(
             "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
         },
     ) as entry_func:
-        retval = entry_func(
-            ["cmd"] + fixture_common_iib_op_args + ["--bundle", "bundle1"]
-        )
+        retval = entry_func(["cmd"] + fixture_common_iib_op_args + ["--bundle", "bundle1"])
 
     assert isinstance(retval, IIBBuildDetailsModel)
 
@@ -469,9 +454,7 @@ def test_add_bundles_py(
     fixture_pulplib_repo_publish.assert_called_once()
 
     task_id = retval.id
-    url_msg = "IIB details: https://{}/api/v1/builds/{}".format(
-        FIXTURE_IIB_SERVER, task_id
-    )
+    url_msg = "IIB details: https://{}/api/v1/builds/{}".format(FIXTURE_IIB_SERVER, task_id)
     assert url_msg in [r.getMessage() for r in caplog.records]
 
     # neither build details nor anything else dumped into stdout
@@ -488,7 +471,6 @@ def test_add_bundles_py_multiple_bundles(
     fixture_container_image_repo,
     fixture_common_iib_op_args,
 ):
-
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
@@ -501,9 +483,7 @@ def test_add_bundles_py_multiple_bundles(
         },
     ) as entry_func:
         retval = entry_func(
-            ["cmd"]
-            + fixture_common_iib_op_args
-            + ["--bundle", "bundle1", "--bundle", "bundle2"]
+            ["cmd"] + fixture_common_iib_op_args + ["--bundle", "bundle1", "--bundle", "bundle2"]
         )
 
     assert isinstance(retval, IIBBuildDetailsModel)
@@ -555,15 +535,12 @@ def test_remove_operators_cli(
     push_items,
     mock_calls_tester,
 ):
-
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
     fixture_iib_client.return_value.remove_operators.side_effect = (
         lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
-            fake_tm.setup_task(
-                *args, **dict(list(kwargs.items()) + [("op_type", "rm")])
-            )
+            fake_tm.setup_task(*args, **dict(list(kwargs.items()) + [("op_type", "rm")]))
         )
     )
     with setup_entry_point_cli(
@@ -595,7 +572,6 @@ def test_remove_operators_cli_error(
     fixture_common_iib_op_args,
     fixture_pushcollector,
 ):
-
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
@@ -640,7 +616,6 @@ def test_remove_operators_py(
     fixture_container_image_repo,
     fixture_common_iib_op_args,
 ):
-
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
