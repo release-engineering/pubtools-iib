@@ -3,6 +3,8 @@ import os
 import logging
 import sys
 
+import requests
+
 from .utils import (
     setup_iib_client,
     setup_pulp_client,
@@ -251,7 +253,7 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
         args.index_image,
         args.bundle if operation == "add_bundles" else args.operator,
         args.arch,
-        **extra_args
+        **extra_args,
     )
 
     push_items = push_items_from_build(build_details, "PENDING", args.pulp_repository)
@@ -265,6 +267,7 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
 
     if build_details.state == "failed":
         LOG.error("IIB operation failed")
+        print_error_message(build_details_url)
         push_items = push_items_from_build(
             build_details, "NOTPUSHED", args.pulp_repository
         )
@@ -351,3 +354,16 @@ def remove_operators_main(sysargs=None):
 
 def _make_iib_build_details_url(host, task_id):
     return "https://%s/api/v1/builds/%s" % (host, task_id)
+
+
+def print_error_message(iib_build_url):
+    """
+    Construct and print an error message for IIB failure.
+
+    Args:
+        iib_build_url (str): URL of the IIB build.
+    """
+    res = requests.get(iib_build_url, timeout=30).json()
+
+    LOG.error("IIB Failed with the error: '%s'", res["state_reason"])
+    LOG.error("Please check the full logs at %s", f"{iib_build_url.rstrip('/')}/logs")

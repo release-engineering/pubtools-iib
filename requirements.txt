@@ -3,3 +3,4 @@ pushcollector
 pubtools-pulp
 iiblib>=7.0.0
 pubtools-pulplib
+requests
