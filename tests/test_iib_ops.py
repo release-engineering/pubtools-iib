@@ -6,9 +6,10 @@ import pytest
 import os
 
 from pubtools.iib.utils import setup_entry_point_cli
-from pubtools.iib.iib_ops import _iib_op_main
+from pubtools.iib.iib_ops import _iib_op_main, print_error_message
 
 import pushcollector
+import requests_mock
 
 
 from iiblib.iib_build_details_model import IIBBuildDetailsModel
@@ -347,7 +348,6 @@ def test_add_bundles_cli(
     push_items,
     mock_calls_tester,
 ):
-
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
@@ -374,7 +374,9 @@ def test_add_bundles_cli(
     )
 
 
+@mock.patch("pubtools.iib.iib_ops.print_error_message")
 def test_add_bundles_cli_error(
+    mock_print_error_message,
     fixture_iib_client,
     fixture_pulp_client,
     fixture_iib_krb_auth,
@@ -384,7 +386,6 @@ def test_add_bundles_cli_error(
     fixture_common_iib_op_args,
     fixture_pushcollector,
 ):
-
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
@@ -419,6 +420,10 @@ def test_add_bundles_cli_error(
         operator_1_push_item_pending,
         operator_1_push_item_notpushed,
     ]
+
+    mock_print_error_message.assert_called_once_with(
+        "https://iib-server/api/v1/builds/task-4"
+    )
 
 
 def test_add_bundles_py(
@@ -488,7 +493,6 @@ def test_add_bundles_py_multiple_bundles(
     fixture_container_image_repo,
     fixture_common_iib_op_args,
 ):
-
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
@@ -555,7 +559,6 @@ def test_remove_operators_cli(
     push_items,
     mock_calls_tester,
 ):
-
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
@@ -585,7 +588,9 @@ def test_remove_operators_cli(
     )
 
 
+@mock.patch("pubtools.iib.iib_ops.print_error_message")
 def test_remove_operators_cli_error(
+    mock_print_error_message,
     fixture_iib_client,
     fixture_pulp_client,
     fixture_iib_krb_auth,
@@ -595,7 +600,6 @@ def test_remove_operators_cli_error(
     fixture_common_iib_op_args,
     fixture_pushcollector,
 ):
-
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
@@ -630,6 +634,10 @@ def test_remove_operators_cli_error(
         operator_1_push_item_delete_notpushed,
     ]
 
+    mock_print_error_message.assert_called_once_with(
+        "https://iib-server/api/v1/builds/task-9"
+    )
+
 
 def test_remove_operators_py(
     fixture_iib_client,
@@ -640,7 +648,6 @@ def test_remove_operators_py(
     fixture_container_image_repo,
     fixture_common_iib_op_args,
 ):
-
     repo = fixture_container_image_repo
     fixture_pulp_client.return_value.search_repository.return_value = [repo]
     fixture_pulp_client.return_value.get_repository.return_value = repo
@@ -669,3 +676,26 @@ def test_invalid_op(fixture_common_iib_op_args):
         assert False, "Should have raised"
     except ValueError:
         pass
+
+
+def test_print_error_message(caplog):
+    caplog.set_level(logging.INFO)
+    with requests_mock.Mocker() as m:
+        m.register_uri(
+            "GET",
+            "https://iib-test.com/api/v1/builds/5",
+            json={"state_reason": "Generic IIB error"},
+        )
+
+        print_error_message("https://iib-test.com/api/v1/builds/5")
+
+        assert (
+            caplog.records[0].message
+            == "IIB Failed with the error: 'Generic IIB error'"
+        )
+        assert caplog.records[1].message == (
+            "Please check the full logs at https://iib-test.com/api/v1/builds/5/logs"
+        )
+
+        assert len(m.request_history) == 1
+        assert m.request_history[0].url == "https://iib-test.com/api/v1/builds/5"
