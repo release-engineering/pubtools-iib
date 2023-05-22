@@ -6,7 +6,7 @@ Unreleased
 
 0.22.0 (2023-05-22)
 -------------------
-* Add Bandit scanning to pipeline 
+* Add Bandit scanning to pipeline
 * Fixed broken tests
 * Drop Python2 support
 * Display an IIB error directly in the pub logs
