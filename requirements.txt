@@ -1,6 +1,6 @@
 setuptools<60.9.0 # remove when https://github.com/pypa/setuptools/issues/3293 is fixed
 pushcollector
 pubtools-pulp
-iiblib>=7.0.0
+iiblib>=7.1.0
 pubtools-pulplib
 requests
