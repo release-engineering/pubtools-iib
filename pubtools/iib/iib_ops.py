@@ -75,13 +75,6 @@ CMD_ARGS = {
         "required": False,
         "type": str,
     },
-    ("--iib-cnr-token",): {
-        "group": "IIB service",
-        "help": "Auth token for quay.io (or set CNR_TOKEN environment variable)",
-        "required": False,
-        "type": str,
-        "env_variable": "CNR_TOKEN",
-    },
     ("--index-image",): {
         "group": "IIB service",
         "help": "<hostname>/<namespace>/<image>:<tag> of index image to rebuild",
@@ -143,12 +136,6 @@ ADD_CMD_ARGS[("--bundle",)] = {
     "required": False,
     "type": str,
     "action": "append",
-}
-ADD_CMD_ARGS[("--iib-legacy-org",)] = {
-    "group": "IIB service",
-    "help": "Organization for legacy registry",
-    "required": False,
-    "type": str,
 }
 ADD_CMD_ARGS[("--deprecation-list",)] = {
     "group": "IIB service",
@@ -231,9 +218,6 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
 
     extra_args = {}
     if operation == "add_bundles":
-        extra_args = {"cnr_token": args.iib_cnr_token}
-        if args.iib_legacy_org:
-            extra_args["organization"] = args.iib_legacy_org
         if args.deprecation_list:
             extra_args["deprecation_list"] = args.deprecation_list.split(",")
 
