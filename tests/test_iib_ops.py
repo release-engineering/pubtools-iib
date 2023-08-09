@@ -173,8 +173,6 @@ def add_bundles_mock_calls_tester(
         "index-image",
         ["bundle1"],
         ["arch"],
-        cnr_token="cnr_token",
-        organization="legacy-org",
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
@@ -199,8 +197,6 @@ def add_bundles_mock_calls_tester_empty_deprecation_list(
         "index-image",
         ["bundle1"],
         ["arch"],
-        cnr_token="cnr_token",
-        organization="legacy-org",
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
@@ -224,8 +220,6 @@ def add_bundles_mock_calls_tester_deprecation_bundles(
         "index-image",
         ["bundle1"],
         ["arch"],
-        cnr_token="cnr_token",
-        organization="legacy-org",
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
@@ -250,8 +244,6 @@ def add_bundles_mock_calls_tester_not_called(
         "index-image",
         ["bundle1"],
         ["arch"],
-        cnr_token="cnr_token",
-        organization="legacy-org",
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
@@ -355,12 +347,9 @@ def test_add_bundles_cli(
     with setup_entry_point_cli(
         ("pubtools_iib", "console_scripts", "pubtools-iib-add-bundles"),
         "pubtools-iib-add-bundle",
-        fixture_common_iib_op_args
-        + ["--bundle", "bundle1", "--iib-legacy-org", "legacy-org"]
-        + extra_args,
+        fixture_common_iib_op_args + ["--bundle", "bundle1"] + extra_args,
         {
             "PULP_PASSWORD": "pulp-password",
-            "CNR_TOKEN": "cnr_token",
             "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
         },
     ) as entry_func:
@@ -406,7 +395,6 @@ def test_add_bundles_cli_error(
         fixture_common_iib_op_args + ["--bundle", "bundle1"],
         {
             "PULP_PASSWORD": "pulp-password",
-            "CNR_TOKEN": "cnr_token",
             "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
         },
     ) as entry_func:
@@ -445,7 +433,6 @@ def test_add_bundles_py(
         ("pubtools_iib", "console_scripts", "pubtools-iib-add-bundles"),
         {
             "PULP_PASSWORD": "pulp-password",
-            "CNR_TOKEN": "cnr_token",
             "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
         },
     ) as entry_func:
@@ -462,7 +449,6 @@ def test_add_bundles_py(
         "index-image",
         ["bundle1"],
         ["arch"],
-        cnr_token="cnr_token",
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
@@ -500,7 +486,6 @@ def test_add_bundles_py_multiple_bundles(
         ("pubtools_iib", "console_scripts", "pubtools-iib-add-bundles"),
         {
             "PULP_PASSWORD": "pulp-password",
-            "CNR_TOKEN": "cnr_token",
             "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
         },
     ) as entry_func:
@@ -519,7 +504,6 @@ def test_add_bundles_py_multiple_bundles(
         "index-image",
         ["bundle1", "bundle2"],
         ["arch"],
-        cnr_token="cnr_token",
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",

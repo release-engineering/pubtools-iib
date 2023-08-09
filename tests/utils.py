@@ -15,8 +15,6 @@ class FakeTaskManager(object):
         map_or_op,
         arches,
         binary_image="binary-image",
-        cnr_token=None,
-        organization=None,
         overwrite_from_index=False,
         overwrite_from_index_token=None,
         state_seq=("in_progress", "finished"),
