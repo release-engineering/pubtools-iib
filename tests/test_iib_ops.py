@@ -187,6 +187,30 @@ def add_bundles_mock_calls_tester(
     fixture_pulplib_repo_publish.assert_called_once()
 
 
+def add_bundles_mock_calls_tester_check_related_images(
+    fixture_iib_client,
+    fixture_pulplib_repo_sync,
+    fixture_pulplib_repo_publish,
+    fixture_iib_krb_auth,
+):
+    fixture_iib_client.return_value.add_bundles.assert_called_once_with(
+        "index-image",
+        ["bundle1"],
+        ["arch"],
+        binary_image="binary-image",
+        overwrite_from_index=True,
+        overwrite_from_index_token="overwrite_from_index_token",
+        build_tags=["extra-tag-1", "extra-tag-2"],
+        check_related_images=True,
+    )
+    fixture_iib_client.assert_called_once_with(
+        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
+    )
+    fixture_pulplib_repo_sync.assert_called_once()
+    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
+    fixture_pulplib_repo_publish.assert_called_once()
+
+
 def add_bundles_mock_calls_tester_empty_deprecation_list(
     fixture_iib_client,
     fixture_pulplib_repo_sync,
@@ -325,6 +349,11 @@ def remove_operators_mock_calls_tester(
             [operator_1_push_item_pending],
             add_bundles_mock_calls_tester_not_called,
         ),
+        (
+            ["--check-related-images"],
+            [operator_1_push_item_pending, operator_1_push_item_pushed],
+            add_bundles_mock_calls_tester_check_related_images,
+        ),
     ],
 )
 def test_add_bundles_cli(
@@ -410,7 +439,7 @@ def test_add_bundles_cli_error(
     ]
 
     mock_print_error_message.assert_called_once_with(
-        "https://iib-server/api/v1/builds/task-4"
+        "https://iib-server/api/v1/builds/task-5"
     )
 
 
@@ -437,7 +466,9 @@ def test_add_bundles_py(
         },
     ) as entry_func:
         retval = entry_func(
-            ["cmd"] + fixture_common_iib_op_args + ["--bundle", "bundle1"]
+            ["cmd"]
+            + fixture_common_iib_op_args
+            + ["--bundle", "bundle1", "--check-related-images"]
         )
 
     assert isinstance(retval, IIBBuildDetailsModel)
@@ -453,6 +484,7 @@ def test_add_bundles_py(
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
         build_tags=["extra-tag-1", "extra-tag-2"],
+        check_related_images=True,
     )
     fixture_pulplib_repo_sync.assert_called_once()
     assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
@@ -619,7 +651,7 @@ def test_remove_operators_cli_error(
     ]
 
     mock_print_error_message.assert_called_once_with(
-        "https://iib-server/api/v1/builds/task-9"
+        "https://iib-server/api/v1/builds/task-10"
     )
 
 

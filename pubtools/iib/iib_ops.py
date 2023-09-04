@@ -1,4 +1,3 @@
-import json
 import os
 import logging
 import sys
@@ -143,6 +142,12 @@ ADD_CMD_ARGS[("--deprecation-list",)] = {
     "required": False,
     "type": str,
 }
+ADD_CMD_ARGS[("--check-related-images",)] = {
+    "group": "IIB service",
+    "help": "Flag to indicate if related and depending images of a bundle should be inspected",
+    "required": False,
+    "type": bool,
+}
 
 RM_CMD_ARGS = CMD_ARGS.copy()
 RM_CMD_ARGS[("--operator",)] = {
@@ -220,6 +225,8 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
     if operation == "add_bundles":
         if args.deprecation_list:
             extra_args["deprecation_list"] = args.deprecation_list.split(",")
+        if args.check_related_images:
+            extra_args["check_related_images"] = args.check_related_images
 
     if args.binary_image:
         extra_args["binary_image"] = args.binary_image

@@ -19,8 +19,9 @@ class FakeTaskManager(object):
         overwrite_from_index_token=None,
         state_seq=("in_progress", "finished"),
         op_type="add",
-        deprecation_list=None,
         build_tags=None,
+        deprecation_list=None,
+        check_related_images=None,
     ):
         tid = self._gen_task_id()
         self.task_state_seq[tid] = list(state_seq)
@@ -47,8 +48,9 @@ class FakeTaskManager(object):
             "organization": None,
             "omps_operator_version": {},
             "distribution_scope": "",
-            "deprecation_list": [] if not deprecation_list else deprecation_list,
             "build_tags": build_tags,
+            "deprecation_list": [] if not deprecation_list else deprecation_list,
+            "check_related_images": check_related_images,
         }
 
         if op_type == "rm":
