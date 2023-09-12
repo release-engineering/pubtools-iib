@@ -4,6 +4,10 @@ ChangeLog
 Unreleased
 -----------
 
+0.23.0 (2023-09-12)
+-------------------
+* Add check_related_images parameter
+
 0.22.0 (2023-05-22)
 -------------------
 * Add Bandit scanning to pipeline
