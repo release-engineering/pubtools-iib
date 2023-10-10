@@ -32,10 +32,7 @@ Usage
 
 ::
 
-  $ export PULP_PASSWORD="pulppassword"
-  $ pubtools-iib-add-bundles --pulp-url https://pulphost.example.com/\
-    --pulp-user pulp-user\
-    --pulp-repository index-image-repository\
+  $ pubtools-iib-add-bundles \
     --iib-server iibhostname.example.com\
     --binary-image container-registry.example.com/binary/image:latest
     --index-image container-registry.example.com/index/image:latest
@@ -43,10 +40,7 @@ Usage
     --arch x86_64
     --deprecation-list container-registry.example.com/index/bundle-image:latest,container-registry.example.com/index/bundle-image:2
 
-  $ export PULP_PASSWORD="pulppassword"
-  $ pubtools-iib-remove-operators --pulp-url https://pulphost.example.com/\
-    --pulp-user pulp-user\
-    --pulp-repository index-image-repository\
+  $ pubtools-iib-remove-operators \
     --iib-server iibhostname.example.com\
     --binary-image container-registry.example.com/binary/image:latest
     --index-image container-registry.example.com/index/image:latest

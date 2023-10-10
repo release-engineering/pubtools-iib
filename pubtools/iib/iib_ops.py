@@ -6,50 +6,16 @@ import requests
 
 from .utils import (
     setup_iib_client,
-    setup_pulp_client,
     setup_arg_parser,
     setup_entry_point_cli,
 )
 
-from pubtools import pulplib
 import pushcollector
 
 LOG = logging.getLogger("pubtools.iib")
 
 
 CMD_ARGS = {
-    ("--pulp-url",): {
-        "group": "Pulp environment",
-        "help": "Pulp server URL",
-        "required": False,
-        "type": str,
-    },
-    ("--pulp-user",): {
-        "group": "Pulp environment",
-        "help": "Pulp username",
-        "required": False,
-        "type": str,
-    },
-    ("--pulp-password",): {
-        "group": "Pulp environment",
-        "help": "Pulp password (or set PULP_PASSWORD environment variable)",
-        "required": False,
-        "type": str,
-        "env_variable": "PULP_PASSWORD",
-    },
-    ("--pulp-insecure",): {
-        "group": "Pulp environment",
-        "help": "Allow unverified HTTPS connection to Pulp",
-        "required": False,
-        "type": bool,
-    },
-    ("--pulp-repository",): {
-        "group": "Pulp environment",
-        "help": "Pulp repository for publishing index image",
-        "required": False,
-        "type": str,
-        "default": "redhat-operators",
-    },
     ("--iib-insecure",): {
         "group": "IIB service",
         "help": "Allow unverified HTTPS connection to IIB",
@@ -113,12 +79,6 @@ CMD_ARGS = {
         "type": str,
         "env_variable": "OVERWRITE_FROM_INDEX_TOKEN",
     },
-    ("--skip-pulp",): {
-        "group": "IIB service",
-        "help": "Skip operations on pulp",
-        "required": False,
-        "type": bool,
-    },
     ("--build-tag",): {
         "group": "IIB service",
         "help": "extra tags to apply on built index image in temp namespace",
@@ -159,7 +119,7 @@ RM_CMD_ARGS[("--operator",)] = {
 }
 
 
-def push_items_from_build(build_details, state, pulp_repository):
+def push_items_from_build(build_details, state):
     ret = []
     if build_details.request_type == "add":
         for operator, bundles in build_details.bundle_mapping.items():
@@ -169,7 +129,7 @@ def push_items_from_build(build_details, state, pulp_repository):
                     "origin": build_details.from_index or "scratch",
                     "src": bundle,
                     "filename": operator,
-                    "dest": pulp_repository,
+                    "dest": "redhat-operator-index",
                     "build": build_details.index_image,
                     "signing_key": None,
                     "checksums": None,
@@ -182,7 +142,7 @@ def push_items_from_build(build_details, state, pulp_repository):
                 "origin": build_details.from_index or "scratch",
                 "src": None,
                 "filename": operator,
-                "dest": pulp_repository,
+                "dest": "redhat-operator-index",
                 "build": build_details.index_image,
                 "signing_key": None,
                 "checksums": None,
@@ -212,9 +172,6 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
         raise ValueError("Must set iib operation")
 
     pc = pushcollector.Collector.get()
-    if not args.skip_pulp:
-        LOG.debug("Initializing pulp client")
-        pulp_c = setup_pulp_client(args)
     LOG.debug("Initializing iib client")
     iib_c = setup_iib_client(args)
     LOG.debug("Request to rebuild %s", args.index_image)
@@ -247,7 +204,7 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
         **extra_args,
     )
 
-    push_items = push_items_from_build(build_details, "PENDING", args.pulp_repository)
+    push_items = push_items_from_build(build_details, "PENDING")
     LOG.debug("Updating push items")
     pc.update_push_items(push_items)
 
@@ -259,53 +216,13 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
     if build_details.state == "failed":
         LOG.error("IIB operation failed")
         print_error_message(build_details_url)
-        push_items = push_items_from_build(
-            build_details, "NOTPUSHED", args.pulp_repository
-        )
+        push_items = push_items_from_build(build_details, "NOTPUSHED")
         pc.update_push_items(push_items)
         sys.exit(1)
 
-    LOG.info("IIB build finished")
-    if args.skip_pulp:
-        return build_details
-
-    LOG.debug("Getting pulp repository: %s", args.pulp_repository)
-    container_repo = pulp_c.get_repository(args.pulp_repository)
-    feed, path = build_details.index_image.split("/", 1)
-    upstream_name, tag = path.split(":")
-    LOG.info("Syncing pulp repository with %s", build_details.index_image)
-    container_repo.sync(
-        pulplib.ContainerSyncOptions(
-            feed="https://%s" % feed, upstream_name=upstream_name, tags=[tag]
-        )
-    ).result()
-    LOG.info("Publishing repository %s", args.pulp_repository)
-    publish_args = [
-        "--pulp-url",
-        args.pulp_url,
-        "--pulp-user",
-        args.pulp_user,
-        "--repo-ids",
-        args.pulp_repository,
-    ]
-    env_args = {"PULP_PASSWORD": args.pulp_password}
-    if args.pulp_insecure:
-        publish_args.append("--pulp-insecure")
-
-    with setup_entry_point_cli(
-        ("pubtools-pulp", "console_scripts", "pubtools-pulp-publish"),
-        "pubtools-pulp-publish",
-        publish_args,
-        env_args,
-    ) as entry_func:
-        entry_func()
-
-    push_items = push_items_from_build(
-        build_details, items_final_state, args.pulp_repository
-    )
-    LOG.info("IIB push finished")
+    push_items = push_items_from_build(build_details, items_final_state)
     pc.update_push_items(push_items)
-
+    LOG.info("IIB build finished")
     return build_details
 
 

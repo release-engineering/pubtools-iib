@@ -13,7 +13,6 @@ import requests_mock
 
 
 from iiblib.iib_build_details_model import IIBBuildDetailsModel
-from pubtools.pulplib import ContainerImageRepository
 from more_executors.futures import f_return
 
 from utils import FakeTaskManager, FakeCollector
@@ -29,7 +28,7 @@ operator_1_push_item_pending = {
     "origin": "index-image",
     "filename": "operator-1",
     "build": "feed.com/index/image:tag",
-    "dest": "redhat-operators",
+    "dest": "redhat-operator-index",
     "signing_key": None,
     "checksums": None,
     "src": "bundle1",
@@ -44,7 +43,7 @@ operator_1_push_item_delete_pending = {
     "origin": "index-image",
     "filename": "operator-1",
     "build": "feed.com/index/image:tag",
-    "dest": "redhat-operators",
+    "dest": "redhat-operator-index",
     "signing_key": None,
     "checksums": None,
     "src": None,
@@ -107,43 +106,8 @@ def fixture_iib_krb_auth():
 
 
 @pytest.fixture
-def fixture_pulp_client():
-    with mock.patch("pubtools.pulplib.Client") as pulpc_patched:
-        yield pulpc_patched
-
-
-@pytest.fixture
-def fixture_pulplib_repo_publish():
-    with mock.patch(
-        "pubtools.pulplib.ContainerImageRepository.publish"
-    ) as repo_publish_patched:
-        repo_publish_patched.return_value = f_return()
-        yield repo_publish_patched
-
-
-@pytest.fixture
-def fixture_pulplib_repo_sync():
-    with mock.patch(
-        "pubtools.pulplib.ContainerImageRepository.sync"
-    ) as repo_sync_patched:
-        yield repo_sync_patched
-
-
-@pytest.fixture
-def fixture_container_image_repo():
-    repo = ContainerImageRepository(id="redhat-operators")
-    repo.__dict__["_client"] = fixture_pulp_client
-    return repo
-
-
-@pytest.fixture
 def fixture_common_iib_op_args():
     return [
-        "--pulp-url",
-        "pulp-url",
-        "--pulp-user",
-        "pulp-user",
-        "--pulp-insecure",
         "--iib-server",
         FIXTURE_IIB_SERVER,
         "--index-image",
@@ -165,8 +129,6 @@ def fixture_common_iib_op_args():
 
 def add_bundles_mock_calls_tester(
     fixture_iib_client,
-    fixture_pulplib_repo_sync,
-    fixture_pulplib_repo_publish,
     fixture_iib_krb_auth,
 ):
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
@@ -182,15 +144,10 @@ def add_bundles_mock_calls_tester(
     fixture_iib_client.assert_called_once_with(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
     )
-    fixture_pulplib_repo_sync.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
-    fixture_pulplib_repo_publish.assert_called_once()
 
 
 def add_bundles_mock_calls_tester_check_related_images(
     fixture_iib_client,
-    fixture_pulplib_repo_sync,
-    fixture_pulplib_repo_publish,
     fixture_iib_krb_auth,
 ):
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
@@ -206,15 +163,10 @@ def add_bundles_mock_calls_tester_check_related_images(
     fixture_iib_client.assert_called_once_with(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
     )
-    fixture_pulplib_repo_sync.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
-    fixture_pulplib_repo_publish.assert_called_once()
 
 
 def add_bundles_mock_calls_tester_empty_deprecation_list(
     fixture_iib_client,
-    fixture_pulplib_repo_sync,
-    fixture_pulplib_repo_publish,
     fixture_iib_krb_auth,
 ):
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
@@ -229,15 +181,10 @@ def add_bundles_mock_calls_tester_empty_deprecation_list(
     fixture_iib_client.assert_called_once_with(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
     )
-    fixture_pulplib_repo_sync.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
-    fixture_pulplib_repo_publish.assert_called_once()
 
 
 def add_bundles_mock_calls_tester_deprecation_bundles(
     fixture_iib_client,
-    fixture_pulplib_repo_sync,
-    fixture_pulplib_repo_publish,
     fixture_iib_krb_auth,
 ):
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
@@ -253,15 +200,10 @@ def add_bundles_mock_calls_tester_deprecation_bundles(
     fixture_iib_client.assert_called_once_with(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
     )
-    fixture_pulplib_repo_sync.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
-    fixture_pulplib_repo_publish.assert_called_once()
 
 
 def add_bundles_mock_calls_tester_not_called(
     fixture_iib_client,
-    fixture_pulplib_repo_sync,
-    fixture_pulplib_repo_publish,
     fixture_iib_krb_auth,
 ):
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
@@ -276,14 +218,10 @@ def add_bundles_mock_calls_tester_not_called(
     fixture_iib_client.assert_called_once_with(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
     )
-    fixture_pulplib_repo_sync.assert_not_called()
-    fixture_pulplib_repo_publish.assert_not_called()
 
 
 def remove_operators_mock_calls_tester_not_called(
     fixture_iib_client,
-    fixture_pulplib_repo_sync,
-    fixture_pulplib_repo_publish,
     fixture_iib_krb_auth,
 ):
     fixture_iib_client.assert_called_once_with(
@@ -298,14 +236,10 @@ def remove_operators_mock_calls_tester_not_called(
         overwrite_from_index_token="overwrite_from_index_token",
         build_tags=["extra-tag-1", "extra-tag-2"],
     )
-    fixture_pulplib_repo_sync.assert_not_called()
-    fixture_pulplib_repo_publish.assert_not_called()
 
 
 def remove_operators_mock_calls_tester(
     fixture_iib_client,
-    fixture_pulplib_repo_sync,
-    fixture_pulplib_repo_publish,
     fixture_iib_krb_auth,
 ):
     fixture_iib_client.assert_called_once_with(
@@ -320,10 +254,6 @@ def remove_operators_mock_calls_tester(
         overwrite_from_index_token="overwrite_from_index_token",
         build_tags=["extra-tag-1", "extra-tag-2"],
     )
-    fixture_pulplib_repo_sync.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
-
-    fixture_pulplib_repo_publish.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -345,11 +275,6 @@ def remove_operators_mock_calls_tester(
             add_bundles_mock_calls_tester_empty_deprecation_list,
         ),
         (
-            ["--skip-pulp"],
-            [operator_1_push_item_pending],
-            add_bundles_mock_calls_tester_not_called,
-        ),
-        (
             ["--check-related-images"],
             [operator_1_push_item_pending, operator_1_push_item_pushed],
             add_bundles_mock_calls_tester_check_related_images,
@@ -358,27 +283,18 @@ def remove_operators_mock_calls_tester(
 )
 def test_add_bundles_cli(
     fixture_iib_client,
-    fixture_pulp_client,
     fixture_iib_krb_auth,
-    fixture_pulplib_repo_publish,
-    fixture_pulplib_repo_sync,
-    fixture_container_image_repo,
     fixture_common_iib_op_args,
     fixture_pushcollector,
     extra_args,
     push_items,
     mock_calls_tester,
 ):
-    repo = fixture_container_image_repo
-    fixture_pulp_client.return_value.search_repository.return_value = [repo]
-    fixture_pulp_client.return_value.get_repository.return_value = repo
-
     with setup_entry_point_cli(
         ("pubtools_iib", "console_scripts", "pubtools-iib-add-bundles"),
         "pubtools-iib-add-bundle",
         fixture_common_iib_op_args + ["--bundle", "bundle1"] + extra_args,
         {
-            "PULP_PASSWORD": "pulp-password",
             "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
         },
     ) as entry_func:
@@ -386,8 +302,6 @@ def test_add_bundles_cli(
     assert fixture_pushcollector.items == push_items
     mock_calls_tester(
         fixture_iib_client,
-        fixture_pulplib_repo_sync,
-        fixture_pulplib_repo_publish,
         fixture_iib_krb_auth,
     )
 
@@ -396,17 +310,10 @@ def test_add_bundles_cli(
 def test_add_bundles_cli_error(
     mock_print_error_message,
     fixture_iib_client,
-    fixture_pulp_client,
     fixture_iib_krb_auth,
-    fixture_pulplib_repo_publish,
-    fixture_pulplib_repo_sync,
-    fixture_container_image_repo,
     fixture_common_iib_op_args,
     fixture_pushcollector,
 ):
-    repo = fixture_container_image_repo
-    fixture_pulp_client.return_value.search_repository.return_value = [repo]
-    fixture_pulp_client.return_value.get_repository.return_value = repo
     fixture_iib_client.return_value.add_bundles.side_effect = (
         lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
             fake_tm.setup_task(
@@ -423,7 +330,6 @@ def test_add_bundles_cli_error(
         "pubtools-iib-add-bundle",
         fixture_common_iib_op_args + ["--bundle", "bundle1"],
         {
-            "PULP_PASSWORD": "pulp-password",
             "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
         },
     ) as entry_func:
@@ -439,7 +345,7 @@ def test_add_bundles_cli_error(
     ]
 
     mock_print_error_message.assert_called_once_with(
-        "https://iib-server/api/v1/builds/task-5"
+        "https://iib-server/api/v1/builds/task-4"
     )
 
 
@@ -447,21 +353,13 @@ def test_add_bundles_py(
     caplog,
     capsys,
     fixture_iib_client,
-    fixture_pulp_client,
     fixture_iib_krb_auth,
-    fixture_pulplib_repo_publish,
-    fixture_pulplib_repo_sync,
-    fixture_container_image_repo,
     fixture_common_iib_op_args,
 ):
     caplog.set_level(logging.INFO)
-    repo = fixture_container_image_repo
-    fixture_pulp_client.return_value.search_repository.return_value = [repo]
-    fixture_pulp_client.return_value.get_repository.return_value = repo
     with setup_entry_point_py(
         ("pubtools_iib", "console_scripts", "pubtools-iib-add-bundles"),
         {
-            "PULP_PASSWORD": "pulp-password",
             "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
         },
     ) as entry_func:
@@ -486,10 +384,6 @@ def test_add_bundles_py(
         build_tags=["extra-tag-1", "extra-tag-2"],
         check_related_images=True,
     )
-    fixture_pulplib_repo_sync.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
-
-    fixture_pulplib_repo_publish.assert_called_once()
 
     task_id = retval.id
     url_msg = "IIB details: https://{}/api/v1/builds/{}".format(
@@ -504,20 +398,12 @@ def test_add_bundles_py(
 
 def test_add_bundles_py_multiple_bundles(
     fixture_iib_client,
-    fixture_pulp_client,
     fixture_iib_krb_auth,
-    fixture_pulplib_repo_publish,
-    fixture_pulplib_repo_sync,
-    fixture_container_image_repo,
     fixture_common_iib_op_args,
 ):
-    repo = fixture_container_image_repo
-    fixture_pulp_client.return_value.search_repository.return_value = [repo]
-    fixture_pulp_client.return_value.get_repository.return_value = repo
     with setup_entry_point_py(
         ("pubtools_iib", "console_scripts", "pubtools-iib-add-bundles"),
         {
-            "PULP_PASSWORD": "pulp-password",
             "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
         },
     ) as entry_func:
@@ -541,10 +427,6 @@ def test_add_bundles_py_multiple_bundles(
         overwrite_from_index_token="overwrite_from_index_token",
         build_tags=["extra-tag-1", "extra-tag-2"],
     )
-    fixture_pulplib_repo_sync.assert_called_once()
-    assert fixture_pulplib_repo_sync.mock_calls[0].args[0].feed == "https://feed.com"
-
-    fixture_pulplib_repo_publish.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -555,29 +437,17 @@ def test_add_bundles_py_multiple_bundles(
             [operator_1_push_item_delete_pending, operator_1_push_item_deleted],
             remove_operators_mock_calls_tester,
         ),
-        (
-            ["--skip-pulp"],
-            [operator_1_push_item_delete_pending],
-            remove_operators_mock_calls_tester_not_called,
-        ),
     ],
 )
 def test_remove_operators_cli(
     fixture_iib_client,
-    fixture_pulp_client,
     fixture_iib_krb_auth,
-    fixture_pulplib_repo_publish,
-    fixture_pulplib_repo_sync,
-    fixture_container_image_repo,
     fixture_common_iib_op_args,
     fixture_pushcollector,
     extra_args,
     push_items,
     mock_calls_tester,
 ):
-    repo = fixture_container_image_repo
-    fixture_pulp_client.return_value.search_repository.return_value = [repo]
-    fixture_pulp_client.return_value.get_repository.return_value = repo
     fixture_iib_client.return_value.remove_operators.side_effect = (
         lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
             fake_tm.setup_task(
@@ -590,7 +460,6 @@ def test_remove_operators_cli(
         "pubtools-iib-remove-operators",
         fixture_common_iib_op_args + ["--operator", "1"] + extra_args,
         {
-            "PULP_PASSWORD": "pulp-password",
             "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
         },
     ) as entry_func:
@@ -598,8 +467,6 @@ def test_remove_operators_cli(
     assert fixture_pushcollector.items == push_items
     mock_calls_tester(
         fixture_iib_client,
-        fixture_pulplib_repo_sync,
-        fixture_pulplib_repo_publish,
         fixture_iib_krb_auth,
     )
 
@@ -608,17 +475,10 @@ def test_remove_operators_cli(
 def test_remove_operators_cli_error(
     mock_print_error_message,
     fixture_iib_client,
-    fixture_pulp_client,
     fixture_iib_krb_auth,
-    fixture_pulplib_repo_publish,
-    fixture_pulplib_repo_sync,
-    fixture_container_image_repo,
     fixture_common_iib_op_args,
     fixture_pushcollector,
 ):
-    repo = fixture_container_image_repo
-    fixture_pulp_client.return_value.search_repository.return_value = [repo]
-    fixture_pulp_client.return_value.get_repository.return_value = repo
     fixture_iib_client.return_value.remove_operators.side_effect = (
         lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
             fake_tm.setup_task(
@@ -635,7 +495,6 @@ def test_remove_operators_cli_error(
         "pubtools-iib-remove-operators",
         fixture_common_iib_op_args + ["--operator", "1"],
         {
-            "PULP_PASSWORD": "pulp-password",
             "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
         },
     ) as entry_func:
@@ -651,26 +510,18 @@ def test_remove_operators_cli_error(
     ]
 
     mock_print_error_message.assert_called_once_with(
-        "https://iib-server/api/v1/builds/task-10"
+        "https://iib-server/api/v1/builds/task-8"
     )
 
 
 def test_remove_operators_py(
     fixture_iib_client,
-    fixture_pulp_client,
     fixture_iib_krb_auth,
-    fixture_pulplib_repo_publish,
-    fixture_pulplib_repo_sync,
-    fixture_container_image_repo,
     fixture_common_iib_op_args,
 ):
-    repo = fixture_container_image_repo
-    fixture_pulp_client.return_value.search_repository.return_value = [repo]
-    fixture_pulp_client.return_value.get_repository.return_value = repo
     with setup_entry_point_py(
         ("pubtools_iib", "console_scripts", "pubtools-iib-remove-operators"),
         {
-            "PULP_PASSWORD": "pulp-password",
             "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
         },
     ) as entry_func:
@@ -680,8 +531,6 @@ def test_remove_operators_py(
 
     remove_operators_mock_calls_tester(
         fixture_iib_client,
-        fixture_pulplib_repo_sync,
-        fixture_pulplib_repo_publish,
         fixture_iib_krb_auth,
     )
 

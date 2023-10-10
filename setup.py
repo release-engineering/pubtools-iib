@@ -49,7 +49,7 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 
-INSTALL_REQURIES = ["setuptools", "pubtools-pulplib", "pubtools-pulp", "iiblib"]
+INSTALL_REQURIES = ["setuptools", "iiblib", "pushcollector", "requests"]
 
 DEPENDENCY_LINKS = []
 
