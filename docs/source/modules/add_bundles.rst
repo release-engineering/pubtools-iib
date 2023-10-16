@@ -12,10 +12,7 @@ Example of usage
 
 ::
 
-  $ export PULP_PASSWORD="pulppassword"
-  $ pubtools-iib-add-bundles --pulp-url https://pulphost.example.com/\
-    --pulp-user pulp-user\
-    --pulp-repository index-image-repository\
+  $ pubtools-iib-add-bundles \
     --iib-server iibhostname.example.com\
     --binary-image container-registry.example.com/binary/image:latest
     --index-image container-registry.example.com/index/image:latest

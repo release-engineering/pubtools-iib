@@ -5,7 +5,6 @@ import sys
 import pkg_resources
 
 from iiblib import iib_client, iib_authentication
-from pubtools import pulplib
 
 
 def setup_iib_client(parsed_args):
@@ -21,14 +20,6 @@ def setup_iib_client(parsed_args):
         kwargs["ssl_verify"] = False
     iibc = iib_client.IIBClient(parsed_args.iib_server, **kwargs)
     return iibc
-
-
-def setup_pulp_client(parsed_args):
-    pulp_kwargs = {"auth": (parsed_args.pulp_user, parsed_args.pulp_password)}
-    if parsed_args.pulp_insecure:
-        pulp_kwargs["verify"] = False
-    pulp_c = pulplib.Client(parsed_args.pulp_url, **pulp_kwargs)
-    return pulp_c
 
 
 def setup_arg_parser(args):
