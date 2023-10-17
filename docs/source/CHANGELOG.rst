@@ -4,6 +4,10 @@ ChangeLog
 Unreleased
 -----------
 
+0.24.0 (2023-10-17)
+-------------------
+* Remove Docker Pulp support
+
 0.23.0 (2023-09-12)
 -------------------
 * Add check_related_images parameter
