@@ -1,8 +1,11 @@
 import os
 import logging
 import sys
+from typing import Any
+from argparse import Namespace, ArgumentParser
 
 import requests
+from iiblib.iib_build_details_model import IIBBuildDetailsModel
 
 from .utils import (
     setup_iib_client,
@@ -119,7 +122,9 @@ RM_CMD_ARGS[("--operator",)] = {
 }
 
 
-def push_items_from_build(build_details, state):
+def push_items_from_build(
+    build_details: IIBBuildDetailsModel, state: str
+) -> list[dict[Any, Any]]:
     ret = []
     if build_details.request_type == "add":
         for operator, bundles in build_details.bundle_mapping.items():
@@ -152,7 +157,7 @@ def push_items_from_build(build_details, state):
     return ret
 
 
-def process_parsed_args(parsed_args, args):
+def process_parsed_args(parsed_args: Namespace, args: dict[Any, Any]) -> Namespace:
     for aliases, arg_data in args.items():
         named_alias = [
             x.lstrip("-").replace("-", "_") for x in aliases if x.startswith("--")
@@ -162,12 +167,18 @@ def process_parsed_args(parsed_args, args):
                 arg_data["env_variable"]
             ):
                 setattr(
-                    parsed_args, named_alias, os.environ.get(arg_data["env_variable"])
+                    parsed_args,
+                    named_alias,
+                    os.environ.get(arg_data["env_variable"]),
                 )
     return parsed_args
 
 
-def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
+def _iib_op_main(
+    args: Namespace,
+    operation: str | None = None,
+    items_final_state: str = "PUSHED",
+) -> list[dict[Any, Any]] | Any:
     if operation not in ("add_bundles", "remove_operators"):
         raise ValueError("Must set iib operation")
 
@@ -226,15 +237,15 @@ def _iib_op_main(args, operation=None, items_final_state="PUSHED"):
     return build_details
 
 
-def make_add_bundles_parser():
+def make_add_bundles_parser() -> ArgumentParser:
     return setup_arg_parser(ADD_CMD_ARGS)
 
 
-def make_rm_operators_parser():
+def make_rm_operators_parser() -> ArgumentParser:
     return setup_arg_parser(RM_CMD_ARGS)
 
 
-def add_bundles_main(sysargs=None):
+def add_bundles_main(sysargs: list[str] | None = None) -> list[dict[Any, Any]]:
     logging.basicConfig(level=logging.INFO)
 
     parser = make_add_bundles_parser()
@@ -247,7 +258,9 @@ def add_bundles_main(sysargs=None):
     return _iib_op_main(args, "add_bundles")
 
 
-def remove_operators_main(sysargs=None):
+def remove_operators_main(
+    sysargs: list[str] | None = None,
+) -> list[dict[Any, Any]]:
     logging.basicConfig(level=logging.INFO)
 
     parser = make_rm_operators_parser()
@@ -260,11 +273,11 @@ def remove_operators_main(sysargs=None):
     return _iib_op_main(args, "remove_operators", "DELETED")
 
 
-def _make_iib_build_details_url(host, task_id):
+def _make_iib_build_details_url(host: str, task_id: str) -> str:
     return "https://%s/api/v1/builds/%s" % (host, task_id)
 
 
-def print_error_message(iib_build_url):
+def print_error_message(iib_build_url: str) -> None:
     """
     Construct and print an error message for IIB failure.
 
