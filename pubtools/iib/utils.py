@@ -3,11 +3,12 @@ import contextlib
 import os
 import sys
 import pkg_resources
+from typing import Any
 
 from iiblib import iib_client, iib_authentication
 
 
-def setup_iib_client(parsed_args):
+def setup_iib_client(parsed_args: argparse.Namespace) -> iib_client.IIBClient:
     iib_auth = iib_authentication.IIBKrbAuth(
         parsed_args.iib_krb_principal,
         parsed_args.iib_server,
@@ -22,9 +23,9 @@ def setup_iib_client(parsed_args):
     return iibc
 
 
-def setup_arg_parser(args):
+def setup_arg_parser(args: dict[Any, Any]) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
-    arg_groups = {}
+    arg_groups: dict[Any, Any] = {}
     for aliases, arg_data in args.items():
         holder = parser
         if arg_data["group"]:
@@ -52,7 +53,12 @@ def setup_arg_parser(args):
 
 
 @contextlib.contextmanager
-def setup_entry_point_cli(entry_tuple, name, args, environ_vars):
+def setup_entry_point_cli(
+    entry_tuple: tuple[str, str, str],
+    name: str,
+    args: list[str],
+    environ_vars: dict[str, str],
+) -> Any:
     orig_argv = sys.argv[:]
     orig_environ = os.environ.copy()
 
