@@ -1,11 +1,13 @@
 import os
 import logging
 import sys
-from typing import Any
+from typing import Any, Callable
+from functools import partial
 from argparse import Namespace, ArgumentParser
 
 import requests
 from iiblib.iib_build_details_model import IIBBuildDetailsModel
+from iiblib.iib_client import IIBClient
 
 from .utils import (
     setup_iib_client,
@@ -121,6 +123,12 @@ RM_CMD_ARGS[("--operator",)] = {
     "action": "append",
 }
 
+STATE_REASON_RETRY = 1
+RETRY_REASONS = [
+    "The connection failed when updating the request",
+    "Failed to build the container image on the arch",
+]
+
 
 def push_items_from_build(
     build_details: IIBBuildDetailsModel, state: str
@@ -208,24 +216,23 @@ def _iib_op_main(
     if args.build_tag:
         extra_args["build_tags"] = args.build_tag
 
-    build_details = bundle_op(
+    iiblib_method = partial(
+        bundle_op,
         args.index_image,
         args.bundle if operation == "add_bundles" else args.operator,
         args.arch,
         **extra_args,
     )
 
-    push_items = push_items_from_build(build_details, "PENDING")
-    LOG.debug("Updating push items")
-    pc.update_push_items(push_items)
-
-    build_details = iib_c.wait_for_build(build_details)
-
-    build_details_url = _make_iib_build_details_url(args.iib_server, build_details.id)
-    LOG.info("IIB details: %s", build_details_url)
+    build_details = run_iib_build_with_retries(
+        iiblib_method, pc, iib_c, args.iib_server, STATE_REASON_RETRY
+    )
 
     if build_details.state == "failed":
         LOG.error("IIB operation failed")
+        build_details_url = _make_iib_build_details_url(
+            args.iib_server, build_details.id
+        )
         print_error_message(build_details_url)
         push_items = push_items_from_build(build_details, "NOTPUSHED")
         pc.update_push_items(push_items)
@@ -234,6 +241,61 @@ def _iib_op_main(
     push_items = push_items_from_build(build_details, items_final_state)
     pc.update_push_items(push_items)
     LOG.info("IIB build finished")
+    return build_details
+
+
+def run_iib_build_with_retries(
+    iiblib_method: Callable[[], IIBBuildDetailsModel],
+    pc: pushcollector.Collector,
+    iib_client: IIBClient,
+    iib_server: str,
+    retries: int = 1,
+) -> IIBBuildDetailsModel:
+    """
+    Run the IIB build and retry if a specific error types occur.
+
+    Args:
+        iiblib_method (Callable):
+            iiblib method to be called. The method should be callable with no parameters.
+        pc: (Collector):
+            PushCollector instance.
+        iib_client (IIBClient):
+            iiblib client instance.
+        iib_server (str):
+            IIB server.
+        retries (int, optional):
+            Maximum number of times to retry. Defaults to 1.
+    Returns (IIBBuildDetailsModel):
+        Build details as returned by iiblib.
+    """
+    build_details = iiblib_method()
+
+    push_items = push_items_from_build(build_details, "PENDING")
+    LOG.debug("Updating push items")
+    pc.update_push_items(push_items)
+
+    build_details_url = _make_iib_build_details_url(iib_server, build_details.id)
+    LOG.info("IIB details: %s", build_details_url)
+
+    build_details = iib_client.wait_for_build(build_details)
+    # If state_reason doesn't match any retirable reason
+    if not any([build_details.state_reason.startswith(r) for r in RETRY_REASONS]):
+        return build_details
+
+    for i in range(retries):
+        LOG.info(
+            f"IIB build failed for retirable reason: {build_details.state_reason}. "
+            f"Attempting retry {i + 1}/{retries}"
+        )
+
+        build_details = iiblib_method()
+        build_details_url = _make_iib_build_details_url(iib_server, build_details.id)
+        LOG.info("IIB details: %s", build_details_url)
+
+        build_details = iib_client.wait_for_build(build_details)
+        if not any([build_details.state_reason.startswith(r) for r in RETRY_REASONS]):
+            return build_details
+
     return build_details
 
 

@@ -6,7 +6,7 @@ import pytest
 import os
 
 from pubtools.iib.utils import setup_entry_point_cli
-from pubtools.iib.iib_ops import _iib_op_main, print_error_message
+from pubtools.iib.iib_ops import _iib_op_main, print_error_message, run_iib_build_with_retries
 
 import pushcollector
 import requests_mock
@@ -564,3 +564,75 @@ def test_print_error_message(caplog):
 
         assert len(m.request_history) == 1
         assert m.request_history[0].url == "https://iib-test.com/api/v1/builds/5"
+
+
+def test_run_iib_build_with_retries_no_retry():
+    iiblib_method = mock.MagicMock()
+    pc = mock.MagicMock()
+    iib_client = mock.MagicMock()
+    iib_server = "iib-server.com"
+    response = mock.MagicMock()
+    response.id = "10"
+    response.state_reason = "success"
+    iiblib_method.return_value = response
+    iib_client.wait_for_build.return_value = response
+
+    build_details = run_iib_build_with_retries(iiblib_method, pc, iib_client, iib_server)
+    iiblib_method.assert_called_once_with()
+    iib_client.wait_for_build.assert_called_once_with(response)
+    pc.update_push_items.assert_called_once()
+
+    assert build_details == response
+
+
+def test_run_iib_build_with_retries_retry_successful():
+    iiblib_method = mock.MagicMock()
+    pc = mock.MagicMock()
+    iib_client = mock.MagicMock()
+    iib_server = "iib-server.com"
+    response1 = mock.MagicMock()
+    response1.id = "10"
+    response1.state_reason = "Failed to build the container image on the arch amd64"
+    response2 = mock.MagicMock()
+    response2.id = "11"
+    response2.state_reason = "different error"
+    iiblib_method.side_effect = [response1, response2]
+    iib_client.wait_for_build.side_effect = [response1, response2]
+
+    build_details = run_iib_build_with_retries(iiblib_method, pc, iib_client, iib_server)
+    assert iiblib_method.call_count == 2
+    assert iiblib_method.call_args_list[0] == mock.call()
+    assert iiblib_method.call_args_list[1] == mock.call()
+    assert iib_client.wait_for_build.call_count == 2
+    assert iib_client.wait_for_build.call_args_list[0] == mock.call(response1)
+    assert iib_client.wait_for_build.call_args_list[1] == mock.call(response2)
+
+    pc.update_push_items.assert_called_once()
+
+    assert build_details == response2
+
+def test_run_iib_build_with_retries_retry_failed():
+    iiblib_method = mock.MagicMock()
+    pc = mock.MagicMock()
+    iib_client = mock.MagicMock()
+    iib_server = "iib-server.com"
+    response1 = mock.MagicMock()
+    response1.id = "10"
+    response1.state_reason = "Failed to build the container image on the arch amd64"
+    response2 = mock.MagicMock()
+    response2.id = "11"
+    response2.state_reason = "Failed to build the container image on the arch amd64"
+    iiblib_method.side_effect = [response1, response2]
+    iib_client.wait_for_build.side_effect = [response1, response2]
+
+    build_details = run_iib_build_with_retries(iiblib_method, pc, iib_client, iib_server)
+    assert iiblib_method.call_count == 2
+    assert iiblib_method.call_args_list[0] == mock.call()
+    assert iiblib_method.call_args_list[1] == mock.call()
+    assert iib_client.wait_for_build.call_count == 2
+    assert iib_client.wait_for_build.call_args_list[0] == mock.call(response1)
+    assert iib_client.wait_for_build.call_args_list[1] == mock.call(response2)
+
+    pc.update_push_items.assert_called_once()
+
+    assert build_details == response2
