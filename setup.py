@@ -6,7 +6,7 @@ import os
 
 # import pkg_resources
 import sys
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 from setuptools.command.test import test as TestCommand
 
 
@@ -72,7 +72,8 @@ setup(
     url="https://gitlab.cee.redhat.com/jluza/pubtools-iib",
     classifiers=classifiers,
     python_requires=">=3.6",
-    packages=find_packages(exclude=["tests"]),
+    packages=find_namespace_packages(where="src"),
+    package_dir={"": "src"},
     data_files=[],
     install_requires=INSTALL_REQURIES,
     dependency_links=DEPENDENCY_LINKS,
