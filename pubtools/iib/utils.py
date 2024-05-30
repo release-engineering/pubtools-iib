@@ -19,6 +19,8 @@ def setup_iib_client(parsed_args: argparse.Namespace) -> iib_client.IIBClient:
     }
     if parsed_args.iib_insecure:
         kwargs["ssl_verify"] = False
+    if parsed_args.build_timeout:
+        kwargs["wait_for_build_timeout"] = int(parsed_args.build_timeout)
     iibc = iib_client.IIBClient(parsed_args.iib_server, **kwargs)
     return iibc
 

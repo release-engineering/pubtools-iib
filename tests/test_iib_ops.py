@@ -142,7 +142,10 @@ def add_bundles_mock_calls_tester(
         build_tags=["extra-tag-1", "extra-tag-2"],
     )
     fixture_iib_client.assert_called_once_with(
-        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
+        "iib-server",
+        auth=fixture_iib_krb_auth.return_value,
+        ssl_verify=False,
+        wait_for_build_timeout=30,
     )
 
 
@@ -265,7 +268,7 @@ def remove_operators_mock_calls_tester(
             add_bundles_mock_calls_tester_deprecation_bundles,
         ),
         (
-            ["--deprecation-list", "bundle1"],
+            ["--deprecation-list", "bundle1", "--build-timeout", "30"],
             [operator_1_push_item_pending, operator_1_push_item_pushed],
             add_bundles_mock_calls_tester,
         ),

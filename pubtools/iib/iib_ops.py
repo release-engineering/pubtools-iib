@@ -89,6 +89,12 @@ CMD_ARGS = {
         "type": str,
         "action": "append",
     },
+    ("--build-timeout",): {
+        "group": "IIB service",
+        "help": "How long to wait for an IIB build before raising timeout error",
+        "required": False,
+        "type": str,
+    },
 }
 
 ADD_CMD_ARGS = CMD_ARGS.copy()
