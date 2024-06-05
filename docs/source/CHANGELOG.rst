@@ -4,6 +4,10 @@ ChangeLog
 Unreleased
 -----------
 
+0.25.0 (2024-06-05)
+-------------------
+* Add an argument to set the IIB build timeout
+
 0.24.0 (2023-10-17)
 -------------------
 * Remove Docker Pulp support
