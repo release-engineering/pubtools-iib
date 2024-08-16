@@ -81,6 +81,7 @@ setup(
         "console_scripts": [
             "pubtools-iib-add-bundles = pubtools.iib.iib_ops:add_bundles_main",
             "pubtools-iib-remove-operators = pubtools.iib.iib_ops:remove_operators_main",
+            "pubtools-iib-add-deprecations = pubtools.iib.iib_ops:add_deprecations_main",
         ]
     },
     include_package_data=True,
