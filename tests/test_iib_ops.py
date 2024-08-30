@@ -53,6 +53,13 @@ operator_1_push_item_deleted["state"] = "DELETED"
 operator_1_push_item_delete_notpushed = operator_1_push_item_delete_pending.copy()
 operator_1_push_item_delete_notpushed["state"] = "NOTPUSHED"
 
+operator_1_push_item_ad_pending = operator_1_push_item_pending.copy()
+operator_1_push_item_ad_pending["src"] = None
+operator_1_push_item_ad = operator_1_push_item_ad_pending.copy()
+operator_1_push_item_ad["state"] = "PUSHED"
+operator_1_push_item_ad_notpushed = operator_1_push_item_ad_pending.copy()
+operator_1_push_item_ad_notpushed["state"] = "NOTPUSHED"
+
 
 @contextlib.contextmanager
 def setup_entry_point_py(entry_tuple, environ_vars):
@@ -76,7 +83,12 @@ def fixture_iib_client():
         )
         iibc_patched.return_value.remove_operators.side_effect = (
             lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
-                fake_tm.setup_task(*args, **kwargs)
+                fake_tm.setup_task(*args, **dict(list(kwargs.items())+ [("op_type", "rm")]))
+            )
+        )
+        iibc_patched.return_value.add_deprecations.side_effect = (
+            lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
+                fake_tm.setup_task(*args, **dict(list(kwargs.items())+ [("op_type", "add-deprecations")]))
             )
         )
         iibc_patched.return_value.get_build.side_effect = fake_tm.get_task
@@ -114,8 +126,6 @@ def fixture_common_iib_op_args():
         "index-image",
         "--binary-image",
         "binary-image",
-        "--arch",
-        "arch",
         "--iib-krb-principal",
         "example@REALM",
         "--iib-insecure",
@@ -133,8 +143,8 @@ def add_bundles_mock_calls_tester(
 ):
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
         "index-image",
-        ["bundle1"],
-        ["arch"],
+        bundles=["bundle1"],
+        arches=["arch"],
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
@@ -155,8 +165,8 @@ def add_bundles_mock_calls_tester_check_related_images(
 ):
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
         "index-image",
-        ["bundle1"],
-        ["arch"],
+        bundles=["bundle1"],
+        arches=["arch"],
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
@@ -174,8 +184,8 @@ def add_bundles_mock_calls_tester_empty_deprecation_list(
 ):
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
         "index-image",
-        ["bundle1"],
-        ["arch"],
+        bundles=["bundle1"],
+        arches=["arch"],
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
@@ -192,8 +202,8 @@ def add_bundles_mock_calls_tester_deprecation_bundles(
 ):
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
         "index-image",
-        ["bundle1"],
-        ["arch"],
+        bundles=["bundle1"],
+        arches=["arch"],
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
@@ -202,42 +212,6 @@ def add_bundles_mock_calls_tester_deprecation_bundles(
     )
     fixture_iib_client.assert_called_once_with(
         "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
-    )
-
-
-def add_bundles_mock_calls_tester_not_called(
-    fixture_iib_client,
-    fixture_iib_krb_auth,
-):
-    fixture_iib_client.return_value.add_bundles.assert_called_once_with(
-        "index-image",
-        ["bundle1"],
-        ["arch"],
-        binary_image="binary-image",
-        overwrite_from_index=True,
-        overwrite_from_index_token="overwrite_from_index_token",
-        build_tags=["extra-tag-1", "extra-tag-2"],
-    )
-    fixture_iib_client.assert_called_once_with(
-        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
-    )
-
-
-def remove_operators_mock_calls_tester_not_called(
-    fixture_iib_client,
-    fixture_iib_krb_auth,
-):
-    fixture_iib_client.assert_called_once_with(
-        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
-    )
-    fixture_iib_client.return_value.remove_operators.assert_called_once_with(
-        "index-image",
-        ["1"],
-        ["arch"],
-        binary_image="binary-image",
-        overwrite_from_index=True,
-        overwrite_from_index_token="overwrite_from_index_token",
-        build_tags=["extra-tag-1", "extra-tag-2"],
     )
 
 
@@ -250,8 +224,26 @@ def remove_operators_mock_calls_tester(
     )
     fixture_iib_client.return_value.remove_operators.assert_called_once_with(
         "index-image",
-        ["1"],
-        ["arch"],
+        operators=["operator-1"],
+        arches=["arch"],
+        binary_image="binary-image",
+        overwrite_from_index=True,
+        overwrite_from_index_token="overwrite_from_index_token",
+        build_tags=["extra-tag-1", "extra-tag-2"],
+    )
+
+
+def add_deprecations_mock_calls_tester(
+    fixture_iib_client,
+    fixture_iib_krb_auth,
+):
+    fixture_iib_client.assert_called_once_with(
+        "iib-server", auth=fixture_iib_krb_auth.return_value, ssl_verify=False
+    )
+    fixture_iib_client.return_value.add_deprecations.assert_called_once_with(
+        "index-image",
+        deprecation_schema='{"a": "b"}',
+        operator_package="operator-1",
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
@@ -263,22 +255,22 @@ def remove_operators_mock_calls_tester(
     "extra_args,push_items,mock_calls_tester",
     [
         (
-            ["--deprecation-list", "bundle1,bundle2"],
+            ["--deprecation-list", "bundle1,bundle2", "--arch", "arch"],
             [operator_1_push_item_pending, operator_1_push_item_pushed],
             add_bundles_mock_calls_tester_deprecation_bundles,
         ),
         (
-            ["--deprecation-list", "bundle1", "--build-timeout", "30"],
+            ["--deprecation-list", "bundle1", "--build-timeout", "30", "--arch", "arch"],
             [operator_1_push_item_pending, operator_1_push_item_pushed],
             add_bundles_mock_calls_tester,
         ),
         (
-            ["--deprecation-list", ""],
+            ["--deprecation-list", "", "--arch", "arch"],
             [operator_1_push_item_pending, operator_1_push_item_pushed],
             add_bundles_mock_calls_tester_empty_deprecation_list,
         ),
         (
-            ["--check-related-images"],
+            ["--check-related-images", "--arch", "arch"],
             [operator_1_push_item_pending, operator_1_push_item_pushed],
             add_bundles_mock_calls_tester_check_related_images,
         ),
@@ -369,7 +361,7 @@ def test_add_bundles_py(
         retval = entry_func(
             ["cmd"]
             + fixture_common_iib_op_args
-            + ["--bundle", "bundle1", "--check-related-images"]
+            + ["--bundle", "bundle1", "--check-related-images", "--arch", "arch"]
         )
 
     assert isinstance(retval, IIBBuildDetailsModel)
@@ -379,8 +371,8 @@ def test_add_bundles_py(
     )
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
         "index-image",
-        ["bundle1"],
-        ["arch"],
+        bundles=["bundle1"],
+        arches=["arch"],
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
@@ -413,7 +405,7 @@ def test_add_bundles_py_multiple_bundles(
         retval = entry_func(
             ["cmd"]
             + fixture_common_iib_op_args
-            + ["--bundle", "bundle1", "--bundle", "bundle2"]
+            + ["--bundle", "bundle1", "--bundle", "bundle2", "--arch", "arch"]
         )
 
     assert isinstance(retval, IIBBuildDetailsModel)
@@ -423,8 +415,8 @@ def test_add_bundles_py_multiple_bundles(
     )
     fixture_iib_client.return_value.add_bundles.assert_called_once_with(
         "index-image",
-        ["bundle1", "bundle2"],
-        ["arch"],
+        bundles=["bundle1", "bundle2"],
+        arches=["arch"],
         binary_image="binary-image",
         overwrite_from_index=True,
         overwrite_from_index_token="overwrite_from_index_token",
@@ -436,7 +428,7 @@ def test_add_bundles_py_multiple_bundles(
     "extra_args,push_items,mock_calls_tester",
     [
         (
-            [],
+            ["--arch", "arch"],
             [operator_1_push_item_delete_pending, operator_1_push_item_deleted],
             remove_operators_mock_calls_tester,
         ),
@@ -461,7 +453,7 @@ def test_remove_operators_cli(
     with setup_entry_point_cli(
         ("pubtools_iib", "console_scripts", "pubtools-iib-remove-operators"),
         "pubtools-iib-remove-operators",
-        fixture_common_iib_op_args + ["--operator", "1"] + extra_args,
+        fixture_common_iib_op_args + ["--operator", "operator-1"] + extra_args,
         {
             "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
         },
@@ -496,7 +488,7 @@ def test_remove_operators_cli_error(
     with setup_entry_point_cli(
         ("pubtools_iib", "console_scripts", "pubtools-iib-remove-operators"),
         "pubtools-iib-remove-operators",
-        fixture_common_iib_op_args + ["--operator", "1"],
+        fixture_common_iib_op_args + ["--operator", "operator-1"],
         {
             "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
         },
@@ -528,11 +520,104 @@ def test_remove_operators_py(
             "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
         },
     ) as entry_func:
-        retval = entry_func(["cmd"] + fixture_common_iib_op_args + ["--operator", "1"])
+        retval = entry_func(["cmd"] + fixture_common_iib_op_args + ["--operator", "operator-1", "--arch", "arch"])
 
     assert isinstance(retval, IIBBuildDetailsModel)
 
     remove_operators_mock_calls_tester(
+        fixture_iib_client,
+        fixture_iib_krb_auth,
+    )
+
+
+def test_add_deprecations_cli(
+    fixture_iib_client,
+    fixture_iib_krb_auth,
+    fixture_common_iib_op_args,
+    fixture_pushcollector,
+):
+    fixture_iib_client.return_value.add_deprecations.side_effect = (
+        lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
+            fake_tm.setup_task(
+                *args, **dict(list(kwargs.items()) + [("op_type", "add-deprecations")])
+            )
+        )
+    )
+    with setup_entry_point_cli(
+        ("pubtools_iib", "console_scripts", "pubtools-iib-add-deprecations"),
+        "pubtools-iib-add-deprecations",
+        fixture_common_iib_op_args + ["--operator-package", "operator-1", "--deprecation-schema", '{"a": "b"}'],
+        {
+            "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
+        },
+    ) as entry_func:
+        entry_func()
+    assert fixture_pushcollector.items == [operator_1_push_item_ad_pending, operator_1_push_item_ad]
+    add_deprecations_mock_calls_tester(
+        fixture_iib_client,
+        fixture_iib_krb_auth,
+    )
+
+
+@mock.patch("pubtools.iib.iib_ops.print_error_message")
+def test_add_deprecations_cli_error(
+    mock_print_error_message,
+    fixture_iib_client,
+    fixture_iib_krb_auth,
+    fixture_common_iib_op_args,
+    fixture_pushcollector,
+):
+    fixture_iib_client.return_value.add_deprecations.side_effect = (
+        lambda *args, **kwargs: IIBBuildDetailsModel.from_dict(
+            fake_tm.setup_task(
+                *args,
+                **dict(
+                    list(kwargs.items())
+                    + [("state_seq", ("in_progress", "failed")), ("op_type", "add-deprecations")]
+                )
+            )
+        )
+    )
+    with setup_entry_point_cli(
+        ("pubtools_iib", "console_scripts", "pubtools-iib-add-deprecations"),
+        "pubtools-iib-add-deprecations",
+        fixture_common_iib_op_args + ["--operator-package", "operator-1", "--deprecation-schema", '{"a": "b"}'],
+        {
+            "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
+        },
+    ) as entry_func:
+        try:
+            entry_func()
+            assert False, "Should have raised SystemError"
+        except SystemExit:
+            pass
+
+    assert fixture_pushcollector.items == [
+        operator_1_push_item_ad_pending,
+        operator_1_push_item_ad_notpushed,
+    ]
+
+    mock_print_error_message.assert_called_once_with(
+        "https://iib-server/api/v1/builds/task-11"
+    )
+
+
+def test_add_deprecations_py(
+    fixture_iib_client,
+    fixture_iib_krb_auth,
+    fixture_common_iib_op_args,
+):
+    with setup_entry_point_py(
+        ("pubtools_iib", "console_scripts", "pubtools-iib-add-deprecations"),
+        {
+            "OVERWRITE_FROM_INDEX_TOKEN": "overwrite_from_index_token",
+        },
+    ) as entry_func:
+        retval = entry_func(["cmd"] + fixture_common_iib_op_args + ["--operator-package", "operator-1", "--deprecation-schema", '{"a": "b"}'])
+
+    assert isinstance(retval, IIBBuildDetailsModel)
+
+    add_deprecations_mock_calls_tester(
         fixture_iib_client,
         fixture_iib_krb_auth,
     )

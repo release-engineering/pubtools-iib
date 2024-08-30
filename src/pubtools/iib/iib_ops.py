@@ -55,13 +55,6 @@ CMD_ARGS = {
         "required": False,
         "type": str,
     },
-    ("--arch",): {
-        "group": "IIB service",
-        "help": "architecture to rebuild",
-        "required": False,
-        "type": str,
-        "action": "append",
-    },
     ("--overwrite-from-index",): {
         "group": "IIB service",
         "help": (
@@ -117,6 +110,13 @@ ADD_CMD_ARGS[("--check-related-images",)] = {
     "required": False,
     "type": bool,
 }
+ADD_CMD_ARGS[("--arch",)] = {
+    "group": "IIB service",
+    "help": "architecture to rebuild",
+    "required": False,
+    "type": str,
+    "action": "append",
+}
 
 RM_CMD_ARGS = CMD_ARGS.copy()
 RM_CMD_ARGS[("--operator",)] = {
@@ -125,6 +125,27 @@ RM_CMD_ARGS[("--operator",)] = {
     "required": True,
     "type": str,
     "action": "append",
+}
+RM_CMD_ARGS[("--arch",)] = {
+    "group": "IIB service",
+    "help": "architecture to rebuild",
+    "required": False,
+    "type": str,
+    "action": "append",
+}
+
+ADD_DEPRECATIONS_CMD_ARGS = CMD_ARGS.copy()
+ADD_DEPRECATIONS_CMD_ARGS[("--deprecation-schema",)] = {
+    "group": "IIB service",
+    "help": "JSON formatted deprecation schema",
+    "required": True,
+    "type": str,
+}
+ADD_DEPRECATIONS_CMD_ARGS[("--operator-package",)] = {
+    "group": "IIB service",
+    "help": "operator name",
+    "required": True,
+    "type": str,
 }
 
 
@@ -150,7 +171,7 @@ def push_items_from_build(
         for operator in build_details.removed_operators:
             item = {
                 "state": state,
-                "origin": build_details.from_index or "scratch",
+                "origin": build_details.from_index,
                 "src": None,
                 "filename": operator,
                 "dest": "redhat-operator-index",
@@ -159,6 +180,18 @@ def push_items_from_build(
                 "checksums": None,
             }
             ret.append(item)
+    elif build_details.request_type == "add-deprecations":
+        item = {
+            "state": state,
+            "origin": build_details.from_index,
+            "src": None,
+            "filename": build_details.operator_package,
+            "dest": "redhat-operator-index",
+            "build": build_details.index_image,
+            "signing_key": None,
+            "checksums": None,
+        }
+        ret.append(item)
 
     return ret
 
@@ -185,7 +218,7 @@ def _iib_op_main(
     operation: str | None = None,
     items_final_state: str = "PUSHED",
 ) -> list[dict[Any, Any]] | Any:
-    if operation not in ("add_bundles", "remove_operators"):
+    if operation not in ("add_bundles", "remove_operators", "add_deprecations"):
         raise ValueError("Must set iib operation")
 
     pc = pushcollector.Collector.get()
@@ -201,6 +234,14 @@ def _iib_op_main(
             extra_args["deprecation_list"] = args.deprecation_list.split(",")
         if args.check_related_images:
             extra_args["check_related_images"] = args.check_related_images
+        extra_args["arches"] = args.arch
+        extra_args["bundles"] = args.bundle
+    if operation == "remove_operators":
+        extra_args["arches"] = args.arch
+        extra_args["operators"] = args.operator
+    if operation == "add_deprecations":
+        extra_args["operator_package"] = args.operator_package
+        extra_args["deprecation_schema"] = args.deprecation_schema
 
     if args.binary_image:
         extra_args["binary_image"] = args.binary_image
@@ -214,12 +255,7 @@ def _iib_op_main(
     if args.build_tag:
         extra_args["build_tags"] = args.build_tag
 
-    build_details = bundle_op(
-        args.index_image,
-        args.bundle if operation == "add_bundles" else args.operator,
-        args.arch,
-        **extra_args,
-    )
+    build_details = bundle_op(args.index_image, **extra_args)
 
     push_items = push_items_from_build(build_details, "PENDING")
     LOG.debug("Updating push items")
@@ -251,6 +287,10 @@ def make_rm_operators_parser() -> ArgumentParser:
     return setup_arg_parser(RM_CMD_ARGS)
 
 
+def make_add_deprecations_parser() -> ArgumentParser:
+    return setup_arg_parser(ADD_DEPRECATIONS_CMD_ARGS)
+
+
 def add_bundles_main(sysargs: list[str] | None = None) -> list[dict[Any, Any]]:
     logging.basicConfig(level=logging.INFO)
 
@@ -277,6 +317,21 @@ def remove_operators_main(
     process_parsed_args(args, RM_CMD_ARGS)
 
     return _iib_op_main(args, "remove_operators", "DELETED")
+
+
+def add_deprecations_main(
+    sysargs: list[str] | None = None,
+) -> list[dict[Any, Any]]:
+    logging.basicConfig(level=logging.INFO)
+
+    parser = make_add_deprecations_parser()
+    if sysargs:
+        args = parser.parse_args(sysargs[1:])
+    else:
+        args = parser.parse_args()
+    process_parsed_args(args, ADD_DEPRECATIONS_CMD_ARGS)
+
+    return _iib_op_main(args, "add_deprecations")
 
 
 def _make_iib_build_details_url(host: str, task_id: str) -> str:
