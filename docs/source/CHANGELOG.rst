@@ -4,6 +4,10 @@ ChangeLog
 Unreleased
 -----------
 
+0.26.0 (2024-08-30)
+-------------------
+* Add add-deprecations entrypoint
+
 0.25.0 (2024-06-05)
 -------------------
 * Add an argument to set the IIB build timeout
